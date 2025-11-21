@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio | Dev Tech</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+    <canvas id="particles"></canvas>
+
+    <header>
+        <div class="logo">&lt;Dev/&gt;</div>
+        <nav class="social-nav">
+            <a href="https://github.com/NordicManX" target="_blank"><i class="fab fa-github"></i></a>
+            <a href="https://linkedin.com/in/nelson-antonio-carvalho-filho" target="_blank"><i
+                    class="fab fa-linkedin"></i></a>
+            <a href="https://wa.me/5541987442812" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://t.me/NordicManX" target="_blank"><i class="fab fa-telegram"></i></a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1 class="glitch-text">Olá, eu sou <br>Nelson Ántonio Filho</h1>
+        <div class="typewriter">
+            Eu desenvolvo <span id="typing-text"></span><span class="cursor">|</span>
+        </div>
+    </section>
+
+    <section class="skills-section">
+        <h2 class="section-title">Minhas Stacks</h2>
+        <div class="skills-grid">
+            <div class="skill-tag">Golang</div>
+            <div class="skill-tag">JavaScript</div>
+            <div class="skill-tag">Python</div>
+            <div class="skill-tag">Node.js</div>
+            <div class="skill-tag">React</div>
+            <div class="skill-tag">Docker</div>
+            <div class="skill-tag">SQL</div>
+            <div class="skill-tag">Git</div>
+            <div class="skill-tag">API REST</div>
+        </div>
+    </section>
+
+    <section class="projects-section">
+        <h2 class="section-title">Repositórios</h2>
+
+        <div class="repos-grid" id="repos-container">
+            <p style="color: var(--text-secondary)">Carregando dados via API...</p>
+        </div>
+
+        <div class="pagination-controls">
+            <button id="btn-prev" class="btn-tech" onclick="changePage(-1)" disabled>
+                <i class="fas fa-chevron-left"></i> Anterior
+            </button>
+            <span id="page-info">Página 1</span>
+            <button id="btn-next" class="btn-tech" onclick="changePage(1)">
+                Próximo <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+
+    <section class="projects-section">
+
+    </section>
+
+    <section class="contact-section">
+        <h2 class="section-title">Iniciar Transmissão</h2>
+
+        <div class="contact-container">
+            <form id="contact-form" action="https://formspree.io/f/xovbaldj" method="POST">
+
+                <div class="input-group">
+                    <input type="text" name="name" required placeholder=" ">
+                    <label>Identificação (Nome)</label>
+                </div>
+
+                <div class="input-group">
+                    <input type="email" name="email" required placeholder=" ">
+                    <label>Frequência (Email)</label>
+                </div>
+
+                <div class="input-group">
+                    <textarea name="message" required placeholder=" " rows="5"></textarea>
+                    <label>Dados da Mensagem</label>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    ENVIAR DADOS <i class="fas fa-paper-plane"></i>
+                </button>
+
+                <p id="form-status" class="status-msg"></p>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <p>Desenvolvido com Clean Code e Café.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
