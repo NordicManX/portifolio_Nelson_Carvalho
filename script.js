@@ -4,9 +4,9 @@ const githubUsername = 'NordicManX';
 // Variáveis de Controle da Paginação
 let allRepos = [];       // Guarda todos os repositórios baixados
 let currentPage = 1;     // Página atual
-const itemsPerPage = 8; // Quantos itens por página
+const itemsPerPage = 8;  // <--- ALTERADO PARA 8 (Fica mais simétrico)
 
-/* --- 2. EFEITO DIGITAÇÃO --- */
+/* --- 2. EFEITO DIGITAÇÃO (TYPEWRITER) --- */
 const texts = ["Soluções Backend", "APIs Robustas", "Sistemas Web", "Automação", "Nordic Tech"];
 let count = 0;
 let index = 0;
@@ -57,12 +57,12 @@ async function getRepos() {
 // Função que desenha os cards na tela baseado na página
 function renderPage(page) {
     const container = document.getElementById('repos-container');
-    container.innerHTML = ''; // Limpa os cards anteriores (efeito de sumir os velhos)
+    container.innerHTML = ''; // Limpa os cards anteriores
 
-    // Lógica Matemática: Define onde começa e termina a lista de 10
+    // Lógica Matemática: Define onde começa e termina a lista de 8
     const start = (page - 1) * itemsPerPage;
     const end = start + itemsPerPage;
-    const paginatedItems = allRepos.slice(start, end); // Pega só os 10 da vez
+    const paginatedItems = allRepos.slice(start, end); // Pega só os 8 da vez
 
     // Cria os cards (mesmo design HUD)
     paginatedItems.forEach((repo, index) => {
@@ -70,7 +70,7 @@ function renderPage(page) {
         card.href = repo.html_url;
         card.target = "_blank";
         card.className = 'repo-card';
-        // Adiciona um delayzinho na animação para aparecer um por um (efeito cascata)
+        // Delay para efeito cascata
         card.style.animationDelay = `${index * 0.1}s`;
 
         const description = repo.description ? repo.description : 'Projeto desenvolvido com foco em tecnologia e performance.';
@@ -109,7 +109,7 @@ function changePage(direction) {
         currentPage = nextPage;
         renderPage(currentPage);
 
-        // Rola suavemente até o topo da seção de projetos
+        // Rola suavemente até o topo da secção de projetos
         document.querySelector('.projects-section').scrollIntoView({
             behavior: 'smooth'
         });
@@ -132,182 +132,218 @@ function updatePaginationControls() {
 // Inicia tudo
 getRepos();
 
-/* --- 4. FUNDO: PARTÍCULAS INTERATIVAS (MOUSE) --- */
+/* --- 4. FUNDO: RESPONSIVO, REPULSÃO & RETORNO LENTO --- */
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 
 if (canvas) {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    let w, h;
+    let particles = [];
 
-    let particlesArray;
+    // Variável de tempo
+    let timeCycle = 0;
 
-    // Objeto que guarda a posição do mouse
-    let mouse = {
-        x: null,
-        y: null,
-        radius: 150 // Raio de interação (distância que o mouse atrai as linhas)
-    }
+    // Configuração do Mouse
+    // baseRadius começa com valor padrão, mas será ajustado no init()
+    let mouse = { x: -1000, y: -1000, baseRadius: 400 };
 
-    // Ouve o movimento do mouse
-    window.addEventListener('mousemove', function (event) {
-        mouse.x = event.x;
-        mouse.y = event.y;
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.x;
+        mouse.y = e.y;
     });
 
-    // Quando o mouse sai da tela, reseta a posição para parar as linhas
-    window.addEventListener('mouseout', function () {
-        mouse.x = undefined;
-        mouse.y = undefined;
+    window.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 0) {
+            // Previne a rolagem da tela enquanto interage com o canvas (opcional)
+            // e.preventDefault(); 
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+        }
+    });
+
+    window.addEventListener('touchend', () => {
+        mouse.x = -1000; mouse.y = -1000;
     });
 
     class Particle {
-        constructor(x, y, directionX, directionY, size, color) {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-            this.directionX = (Math.random() * 1) - 0.5; // Velocidade X
-            this.directionY = (Math.random() * 1) - 0.5; // Velocidade Y
-            this.size = (Math.random() * 2) + 1;
-            this.color = '#00f3ff';
+        constructor(x, y) {
+            this.x = x; this.y = y;
+            this.originX = x; this.originY = y;
+            this.baseSize = 1.5;
+
+            // Vida (Drift)
+            this.driftSpeedX = Math.random() * 0.02 + 0.01;
+            this.driftSpeedY = Math.random() * 0.02 + 0.01;
+            this.driftRange = Math.random() * 5 + 3;
         }
 
-        // Método para desenhar a bolinha
         draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-            ctx.fillStyle = '#00f3ff'; // Cor do Núcleo
-            ctx.fill();
-        }
-
-        // Método para atualizar a posição
-        update() {
-            // Verifica se bateu nas bordas da tela
-            if (this.x > canvas.width || this.x < 0) {
-                this.directionX = -this.directionX;
-            }
-            if (this.y > canvas.height || this.y < 0) {
-                this.directionY = -this.directionY;
-            }
-
-            // Detecção de colisão com o MOUSE
-            let dx = mouse.x - this.x;
-            let dy = mouse.y - this.y;
+            let dx = mouse.x - this.originX;
+            let dy = mouse.y - this.originY;
             let distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance < mouse.radius + this.size) {
-                // Se o mouse estiver perto, a partícula é empurrada levemente (opcional)
-                // ou apenas criamos a conexão visual (linhas).
-                // Para fazer elas fugirem um pouco do mouse (efeito bolha):
-                if (mouse.x < this.x && this.x < canvas.width - this.size * 10) {
-                    this.x += 2;
-                }
-                if (mouse.x > this.x && this.x > this.size * 10) {
-                    this.x -= 2;
-                }
-                if (mouse.y < this.y && this.y < canvas.height - this.size * 10) {
-                    this.y += 2;
-                }
-                if (mouse.y > this.y && this.y > this.size * 10) {
-                    this.y -= 2;
-                }
+            // Borda do Spotlight (Ondulada)
+            let breathing = Math.sin(timeCycle * 0.02) * 30;
+            let dynamicBaseRadius = mouse.baseRadius + breathing;
+
+            let angleToMouse = Math.atan2(dy, dx);
+            let wave1 = Math.sin(angleToMouse * 5 + timeCycle * 0.05) * 20;
+            let wave2 = Math.cos(angleToMouse * 3 - timeCycle * 0.03) * 30;
+            let currentRadius = dynamicBaseRadius + wave1 + wave2;
+
+            if (distance > currentRadius) return;
+
+            // Visual
+            let edgeFactor = distance / currentRadius;
+            let alpha = 1 - edgeFactor;
+            alpha = Math.max(0, alpha);
+
+            let currentSize = this.baseSize + (edgeFactor * 3);
+            let color = `rgba(0, 243, 255, ${alpha})`;
+
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.beginPath();
+            ctx.arc(0, 0, currentSize, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.shadowBlur = 10 + (edgeFactor * 10);
+            ctx.shadowColor = color;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        update() {
+            // 1. CALCULA O DRIFT (Vida Natural)
+            let driftX = Math.sin(timeCycle * this.driftSpeedX + this.originX) * this.driftRange;
+            let driftY = Math.cos(timeCycle * this.driftSpeedY + this.originY) * this.driftRange;
+
+            let targetX = this.originX + driftX;
+            let targetY = this.originY + driftY;
+
+            // 2. CALCULA A INTERAÇÃO (Repulsão)
+            let dx = mouse.x - this.originX;
+            let dy = mouse.y - this.originY;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            let ease = 0.02; // Retorno lento padrão
+
+            if (distance < mouse.baseRadius) {
+                let angle = Math.atan2(dy, dx);
+                let force = (mouse.baseRadius - distance) / mouse.baseRadius;
+
+                // Força do Empurrão: Ajustado para ser proporcional ao tamanho do spotlight
+                let push = force * (mouse.baseRadius * 0.4);
+
+                targetX -= Math.cos(angle) * push;
+                targetY -= Math.sin(angle) * push;
+
+                ease = 0.1; // Reação rápida ao empurrão
             }
 
-            // Move a partícula
-            this.x += this.directionX;
-            this.y += this.directionY;
-
-            this.draw();
+            // 3. APLICA O MOVIMENTO
+            this.x += (targetX - this.x) * ease;
+            this.y += (targetY - this.y) * ease;
         }
     }
 
     function init() {
-        particlesArray = [];
-        // Cria partículas baseado no tamanho da tela (para não ficar pesado)
-        let numberOfParticles = (canvas.height * canvas.width) / 9000;
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+        particles = [];
 
-        for (let i = 0; i < numberOfParticles; i++) {
-            particlesArray.push(new Particle());
-        }
-    }
+        // --- LÓGICA RESPONSIVA ---
+        let isMobile = w < 768; // Verifica se é menor que um tablet
 
-    // Função que desenha as linhas de conexão
-    function connect() {
-        let opacityValue = 1;
-        for (let a = 0; a < particlesArray.length; a++) {
-            for (let b = a; b < particlesArray.length; b++) {
-                let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
-                    ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+        // 1. Ajuste do Espaçamento (Densidade)
+        // Desktop: 35px (mais denso)
+        // Mobile: 50px (menos denso, melhor performance)
+        const spacing = isMobile ? 50 : 35;
 
-                // Se as partículas estiverem perto uma da outra, desenha linha
-                if (distance < (canvas.width / 7) * (canvas.height / 7)) {
-                    opacityValue = 1 - (distance / 20000);
-                    ctx.strokeStyle = 'rgba(0, 243, 255,' + opacityValue + ')';
-                    ctx.lineWidth = 0.5;
-                    ctx.beginPath();
-                    ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                    ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                    ctx.stroke();
-                }
+        // 2. Ajuste do Raio do Spotlight
+        // Desktop: 400px (Gigante)
+        // Mobile: 150px (Adequado para tela estreita)
+        mouse.baseRadius = isMobile ? 150 : 400;
+
+        for (let y = 0; y < h; y += spacing) {
+            for (let x = 0; x < w; x += spacing) {
+                particles.push(new Particle(x, y));
             }
         }
     }
 
     function animate() {
+        ctx.clearRect(0, 0, w, h);
+        timeCycle += 1.5;
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
         requestAnimationFrame(animate);
-        ctx.clearRect(0, 0, innerWidth, innerHeight);
-
-        for (let i = 0; i < particlesArray.length; i++) {
-            particlesArray[i].update();
-        }
-        connect(); // Chama a função que liga os pontos
     }
 
-    window.addEventListener('resize', function () {
-        canvas.width = innerWidth;
-        canvas.height = innerHeight;
-        mouse.radius = ((canvas.height / 80) * (canvas.height / 80));
-        init();
+    // Recalcula tudo se a pessoa girar o celular ou redimensionar a janela
+    window.addEventListener('resize', () => {
+        setTimeout(init, 100);
     });
 
     init();
     animate();
 }
 
-/* --- 5. ENVIO DE FORMULÁRIO (AJAX) --- */
-const form = document.getElementById("contact-form");
+/* --- 5. ENVIO DE FORMULÁRIO (AJAX PERSONALIZADO) --- */
+const contactForm = document.getElementById("contact-form");
 
-async function handleSubmit(event) {
-    event.preventDefault();
-    const status = document.getElementById("form-status");
-    const data = new FormData(event.target);
+if (contactForm) {
+    contactForm.addEventListener("submit", async function (event) {
+        event.preventDefault(); // <--- O SEGREDINHO: Impede o redirecionamento!
 
-    fetch(event.target.action, {
-        method: form.method,
-        body: data,
-        headers: {
-            'Accept': 'application/json'
-        }
-    }).then(response => {
-        if (response.ok) {
-            status.innerHTML = "Transmissão concluída com sucesso!";
-            status.classList.add('success');
-            form.reset(); // Limpa o formulário
-        } else {
-            response.json().then(data => {
+        const statusMsg = document.getElementById("form-status");
+        const submitBtn = contactForm.querySelector('.btn-submit');
+        const originalBtnText = submitBtn.innerHTML;
+
+        // Muda o botão para "Enviando..."
+        submitBtn.innerHTML = 'Enviando... <i class="fas fa-spinner fa-spin"></i>';
+        submitBtn.disabled = true;
+
+        const data = new FormData(event.target);
+
+        try {
+            const response = await fetch(event.target.action, {
+                method: contactForm.method,
+                body: data,
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+                // SUCESSO: Substitui o formulário pela mensagem Tech
+                contactForm.innerHTML = `
+                    <div class="success-message">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Transmissão Confirmada</h3>
+                        <p>Seus dados foram recebidos pela base.</p>
+                        <button onclick="location.reload()" class="btn-tech-small">Nova Mensagem</button>
+                    </div>
+                `;
+            } else {
+                // ERRO DO FORMSPREE
+                const data = await response.json();
                 if (Object.hasOwn(data, 'errors')) {
-                    status.innerHTML = data["errors"].map(error => error["message"]).join(", ");
+                    statusMsg.innerHTML = data["errors"].map(error => error["message"]).join(", ");
                 } else {
-                    status.innerHTML = "Erro na transmissão. Tente novamente.";
+                    statusMsg.innerHTML = "Erro no servidor. Tente novamente.";
                 }
-                status.classList.add('error');
-            })
-        }
-    }).catch(error => {
-        status.innerHTML = "Falha crítica na rede.";
-        status.classList.add('error');
-    });
-}
+                statusMsg.classList.add('error');
 
-if (form) {
-    form.addEventListener("submit", handleSubmit);
+                // Restaura o botão
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            }
+        } catch (error) {
+            // ERRO DE REDE
+            statusMsg.innerHTML = "Falha de conexão. Verifique sua internet.";
+            statusMsg.classList.add('error');
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        }
+    });
 }
