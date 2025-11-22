@@ -1,10 +1,32 @@
-/* --- 1. CONFIGURAÇÃO --- */
+/* --- 1. CONFIGURAÇÃO GERAL --- */
 const githubUsername = 'NordicManX';
+const skillsContainer = document.getElementById('skills-container');
 
-// Variáveis de Controle da Paginação
-let allRepos = [];
-let currentPage = 1;
-const itemsPerPage = 8;
+const techStack = [
+    { name: "Golang", icon: "fab fa-golang" },
+    { name: "Python", icon: "fab fa-python" },
+    { name: "JavaScript", icon: "fab fa-js" },
+    { name: "Node.js", icon: "fab fa-node-js" },
+    { name: "React", icon: "fab fa-react" },
+    { name: "Vue.js", icon: "fab fa-vuejs" },
+    { name: "HTML5", icon: "fab fa-html5" },
+    { name: "CSS3", icon: "fab fa-css3-alt" },
+    { name: "Docker", icon: "fab fa-docker" },
+    { name: "Git", icon: "fab fa-git-alt" },
+    { name: "SQL", icon: "fas fa-database" },
+    { name: "NoSQL", icon: "fas fa-layer-group" },
+    { name: "Linux", icon: "fab fa-linux" }
+];
+
+if (skillsContainer) {
+    skillsContainer.innerHTML = ''; // Limpa antes de renderizar
+    techStack.forEach(skill => {
+        const tag = document.createElement('div');
+        tag.className = 'skill-tag';
+        tag.innerHTML = `<i class="${skill.icon}"></i> ${skill.name}`;
+        skillsContainer.appendChild(tag);
+    });
+}
 
 /* --- 2. EFEITO DIGITAÇÃO (TYPEWRITER) --- */
 const texts = ["Soluções Backend", "APIs Robustas", "Sistemas Web", "Automação", "Nordic Tech"];
@@ -33,6 +55,10 @@ let letter = "";
 })();
 
 /* --- 3. GITHUB API COM PAGINAÇÃO --- */
+let allRepos = [];
+let currentPage = 1;
+const itemsPerPage = 8;
+
 async function getRepos() {
     const container = document.getElementById('repos-container');
     if (!container) return;
@@ -121,25 +147,21 @@ if (canvas) {
     let particles = [];
     let timeCycle = 0;
 
-    // Variáveis de Estado
     let isMobile = false;
     let isTouching = false;
 
-    // Começa no CENTRO para evitar tela preta no iPhone
     let mouse = {
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
         baseRadius: 400
     };
 
-    // EVENTOS (PC)
     window.addEventListener('mousemove', (e) => {
         mouse.x = e.x;
         mouse.y = e.y;
         isTouching = true;
     });
 
-    // EVENTOS (MOBILE)
     window.addEventListener('touchstart', (e) => {
         isTouching = true;
         if (e.touches.length > 0) {
@@ -261,7 +283,6 @@ if (canvas) {
         ctx.clearRect(0, 0, w, h);
         timeCycle += 1.5;
 
-        // MODO AUTOMÁTICO (GHOST MOUSE)
         if (!isTouching) {
             let moveX = Math.sin(timeCycle * 0.01) * (w * 0.3);
             let moveY = Math.cos(timeCycle * 0.015) * (h * 0.2);
@@ -326,35 +347,5 @@ if (contactForm) {
                 statusMsg.classList.add('error');
                 console.error('Erro EmailJS:', err);
             });
-    });
-}
-
-/* --- 6. RENDERIZAÇÃO DAS SKILLS COM ÍCONES (ESTA É A PARTE QUE TINHA SUMIDO) --- */
-const skillsContainer = document.getElementById('skills-container');
-
-const techStack = [
-    { name: "Golang", icon: "fab fa-golang" },
-    { name: "Python", icon: "fab fa-python" },
-    { name: "JavaScript", icon: "fab fa-js" },
-    { name: "Node.js", icon: "fab fa-node-js" },
-    { name: "React", icon: "fab fa-react" },
-    { name: "Vue.js", icon: "fab fa-vuejs" },
-    { name: "HTML5", icon: "fab fa-html5" },
-    { name: "CSS3", icon: "fab fa-css3-alt" },
-    { name: "Docker", icon: "fab fa-docker" },
-    { name: "Git", icon: "fab fa-git-alt" },
-    { name: "SQL", icon: "fas fa-database" },
-    { name: "NoSQL", icon: "fas fa-layer-group" },
-    { name: "Linux", icon: "fab fa-linux" }
-];
-
-if (skillsContainer) {
-    skillsContainer.innerHTML = '';
-
-    techStack.forEach(skill => {
-        const tag = document.createElement('div');
-        tag.className = 'skill-tag';
-        tag.innerHTML = `<i class="${skill.icon}"></i> ${skill.name}`;
-        skillsContainer.appendChild(tag);
     });
 }
