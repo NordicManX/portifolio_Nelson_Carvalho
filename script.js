@@ -14,12 +14,14 @@ let currentText = "";
 let letter = "";
 
 (function type() {
+    const typingElement = document.getElementById("typing-text");
+    if (!typingElement) return;
+
     if (count === texts.length) count = 0;
     currentText = texts[count];
     letter = currentText.slice(0, ++index);
 
-    const typingElement = document.getElementById("typing-text");
-    if (typingElement) typingElement.textContent = letter;
+    typingElement.textContent = letter;
 
     if (letter.length === currentText.length) {
         count++;
@@ -48,6 +50,7 @@ async function getRepos() {
 
 function renderPage(page) {
     const container = document.getElementById('repos-container');
+    if (!container) return;
     container.innerHTML = '';
 
     const start = (page - 1) * itemsPerPage;
@@ -103,9 +106,9 @@ function updatePaginationControls() {
     const pageInfo = document.getElementById('page-info');
     const totalPages = Math.ceil(allRepos.length / itemsPerPage);
 
-    pageInfo.innerText = `Página ${currentPage} de ${totalPages}`;
-    btnPrev.disabled = currentPage === 1;
-    btnNext.disabled = currentPage === totalPages || totalPages === 0;
+    if (pageInfo) pageInfo.innerText = `Página ${currentPage} de ${totalPages}`;
+    if (btnPrev) btnPrev.disabled = currentPage === 1;
+    if (btnNext) btnNext.disabled = currentPage === totalPages || totalPages === 0;
 }
 getRepos();
 
@@ -122,24 +125,21 @@ if (canvas) {
     let isMobile = false;
     let isTouching = false;
 
-    // CONFIGURAÇÃO INICIAL DO MOUSE
-    // TRUQUE: Começa no CENTRO da tela, não fora (-1000).
-    // Assim o usuário vê a luz imediatamente ao carregar.
+    // Começa no CENTRO para evitar tela preta no iPhone
     let mouse = {
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
         baseRadius: 400
     };
 
-    // --- EVENTOS (PC) ---
+    // EVENTOS (PC)
     window.addEventListener('mousemove', (e) => {
         mouse.x = e.x;
         mouse.y = e.y;
-        isTouching = true; // Considera uso ativo
+        isTouching = true;
     });
 
-    // --- EVENTOS (MOBILE) ---
-    // Adicionei 'passive: false' para garantir que o browser não ignore o script
+    // EVENTOS (MOBILE)
     window.addEventListener('touchstart', (e) => {
         isTouching = true;
         if (e.touches.length > 0) {
@@ -157,7 +157,6 @@ if (canvas) {
 
     window.addEventListener('touchend', () => {
         isTouching = false;
-        // Ao soltar, ele volta suavemente para o modo automático
     });
 
     class Particle {
@@ -165,14 +164,12 @@ if (canvas) {
             this.x = x; this.y = y;
             this.originX = x; this.originY = y;
             this.baseSize = 1.5;
-            // Drift (Vida própria)
             this.driftSpeedX = Math.random() * 0.02 + 0.01;
             this.driftSpeedY = Math.random() * 0.02 + 0.01;
             this.driftRange = Math.random() * 5 + 3;
         }
 
         draw() {
-            // Se o mouse não estiver definido (erro de load), usa o centro
             let mx = mouse.x || w / 2;
             let my = mouse.y || h / 2;
 
@@ -180,7 +177,6 @@ if (canvas) {
             let dy = my - this.originY;
             let distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Efeitos de Onda e Pulsação
             let breathing = Math.sin(timeCycle * 0.02) * 30;
             let dynamicBaseRadius = mouse.baseRadius + breathing;
 
@@ -194,11 +190,9 @@ if (canvas) {
             let edgeFactor = distance / currentRadius;
             let alpha = 1 - edgeFactor;
             alpha = Math.max(0, alpha);
+            if (isNaN(alpha)) alpha = 1;
 
             let currentSize = this.baseSize + (edgeFactor * 3);
-
-            // COR: Garante que alpha é um número válido
-            if (isNaN(alpha)) alpha = 1;
             let color = `rgba(0, 243, 255, ${alpha})`;
 
             ctx.save();
@@ -219,7 +213,6 @@ if (canvas) {
             let targetX = this.originX + driftX;
             let targetY = this.originY + driftY;
 
-            // Proteção contra valores nulos
             let mx = mouse.x || w / 2;
             let my = mouse.y || h / 2;
 
@@ -248,14 +241,10 @@ if (canvas) {
         h = canvas.height = window.innerHeight;
         particles = [];
 
-        // Detecção Mobile mais robusta
         isMobile = (w < 768) || ('ontouchstart' in window);
-
-        // No mobile, menos pontos e raio menor para performance
         const spacing = isMobile ? 45 : 35;
         mouse.baseRadius = isMobile ? 180 : 400;
 
-        // Garante que o mouse comece no centro se recarregar a página
         if (!isTouching) {
             mouse.x = w / 2;
             mouse.y = h / 2;
@@ -273,17 +262,13 @@ if (canvas) {
         timeCycle += 1.5;
 
         // MODO AUTOMÁTICO (GHOST MOUSE)
-        // Se ninguém está tocando (e for mobile ou PC ocioso), a luz passeia sozinha
         if (!isTouching) {
-            // Movimento suave em "8" no centro da tela
             let moveX = Math.sin(timeCycle * 0.01) * (w * 0.3);
             let moveY = Math.cos(timeCycle * 0.015) * (h * 0.2);
 
-            // Alvo do movimento automático
             let targetX = (w / 2) + moveX;
             let targetY = (h / 2) + moveY;
 
-            // Interpolação suave para o mouse não "pular" quando solta o dedo
             mouse.x += (targetX - mouse.x) * 0.05;
             mouse.y += (targetY - mouse.y) * 0.05;
         }
@@ -295,7 +280,6 @@ if (canvas) {
         requestAnimationFrame(animate);
     }
 
-    // Otimização de Resize (Debounce) para evitar travar no celular
     let resizeTimeout;
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
@@ -345,7 +329,7 @@ if (contactForm) {
     });
 }
 
-/* --- 6. RENDERIZAÇÃO DAS SKILLS COM ÍCONES --- */
+/* --- 6. RENDERIZAÇÃO DAS SKILLS COM ÍCONES (ESTA É A PARTE QUE TINHA SUMIDO) --- */
 const skillsContainer = document.getElementById('skills-container');
 
 const techStack = [
