@@ -5,15 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio | Nelson Ántonio Filho</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="main.css">
+
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
     <script type="text/javascript">
         (function () {
-            // ATENÇÃO: Aqui vai a PUBLIC KEY (Geralmente começa com "user_" ou são letras aleatórias)
-            // Você pega ela em: Account > Public Key no site do EmailJS.
-            // O "service_..." você usa lá no arquivo script.js
             emailjs.init("a2pCMkQ3naYxEt1If");
         })();
     </script>
@@ -25,15 +24,84 @@
 
     <header>
         <div class="logo">&lt;Dev/&gt;</div>
+
         <nav class="social-nav">
+            <div class="desktop-icons">
+                <a href="https://github.com/NordicManX" target="_blank"><i class="fab fa-github"></i></a>
+                <a href="https://linkedin.com/in/nelson-antonio-carvalho-filho" target="_blank"><i
+                        class="fab fa-linkedin"></i></a>
+                <a href="https://wa.me/5541987442812" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://t.me/NordicManX" target="_blank"><i class="fab fa-telegram"></i></a>
+            </div>
+
+            <!-- BOTÃO HAMBÚRGUER -->
+            <button id="hamburger-btn" class="hamburger-icon">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- MENU LATERAL (SIDEBAR / DROPDOWN) -->
+    <div id="side-menu" class="side-menu">
+        <button id="close-menu" class="close-btn-menu">&times;</button>
+
+        <div class="menu-content">
+            <h3>SISTEMA</h3>
+
+            <!-- Opção 1: Login -->
+            <a href="#" id="menu-login-btn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+
+            <!-- Opção 2: Configurações -->
+            <a href="#" id="menu-config-btn">
+                <i class="fas fa-cog"></i> Configurações
+            </a>
+
+            <hr class="menu-divider">
+
+            <!-- Opção 3: Desconectar (Em vermelho) -->
+            <a href="#" id="menu-logout-btn" class="logout-link">
+                <i class="fas fa-power-off"></i> Desconectar
+            </a>
+        </div>
+
+        <div class="mobile-socials">
             <a href="https://github.com/NordicManX" target="_blank"><i class="fab fa-github"></i></a>
             <a href="https://linkedin.com/in/nelson-antonio-carvalho-filho" target="_blank"><i
                     class="fab fa-linkedin"></i></a>
             <a href="https://wa.me/5541987442812" target="_blank"><i class="fab fa-whatsapp"></i></a>
-            <a href="https://t.me/NordicManX" target="_blank"><i class="fab fa-telegram"></i></a>
-        </nav>
-    </header>
+        </div>
+    </div>
 
+    <!-- MODAL DE LOGIN -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="modal-content login-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-fingerprint"></i> ACESSO RESTRITO</h3>
+                <button id="close-login" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Ambiente de Servidor e Nuvem Privada.</p>
+                <form id="login-form">
+                    <div class="input-group">
+                        <input type="text" id="username" required placeholder=" ">
+                        <label>Usuário / ID</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="password" required placeholder=" ">
+                        <label>Chave de Acesso</label>
+                    </div>
+                    <button type="submit" class="btn-submit btn-login">
+                        AUTENTICAR <i class="fas fa-unlock-alt"></i>
+                    </button>
+                    <p id="login-msg" class="status-msg"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEÇÕES DO SITE -->
     <section class="hero">
         <h1 class="glitch-text">Olá, eu sou <br>Nelson Ántonio Filho</h1>
         <div class="typewriter">
@@ -48,46 +116,33 @@
 
     <section class="projects-section">
         <h2 class="section-title">Repositórios</h2>
-
-        <div class="repos-grid" id="repos-container">
-        </div>
-
+        <div class="repos-grid" id="repos-container"></div>
         <div class="pagination-controls">
-            <button id="btn-prev" class="btn-tech" onclick="changePage(-1)" disabled>
-                <i class="fas fa-chevron-left"></i> Anterior
-            </button>
+            <button id="btn-prev" class="btn-tech" onclick="changePage(-1)" disabled><i class="fas fa-chevron-left"></i>
+                Anterior</button>
             <span id="page-info">Página 1</span>
-            <button id="btn-next" class="btn-tech" onclick="changePage(1)">
-                Próximo <i class="fas fa-chevron-right"></i>
-            </button>
+            <button id="btn-next" class="btn-tech" onclick="changePage(1)">Próximo <i
+                    class="fas fa-chevron-right"></i></button>
         </div>
     </section>
 
     <section class="contact-section">
         <h2 class="section-title">Iniciar Transmissão</h2>
-
         <div class="contact-container">
             <form id="contact-form">
-
                 <div class="input-group">
                     <input type="text" name="name" required placeholder=" ">
                     <label>Identificação (Nome)</label>
                 </div>
-
                 <div class="input-group">
                     <input type="email" name="email" required placeholder=" ">
                     <label>Frequência (Email)</label>
                 </div>
-
                 <div class="input-group">
                     <textarea name="message" required placeholder=" " rows="5"></textarea>
                     <label>Dados da Mensagem</label>
                 </div>
-
-                <button type="submit" class="btn-submit">
-                    ENVIAR DADOS <i class="fas fa-paper-plane"></i>
-                </button>
-
+                <button type="submit" class="btn-submit">ENVIAR DADOS <i class="fas fa-paper-plane"></i></button>
                 <p id="form-status" class="status-msg"></p>
             </form>
         </div>
@@ -95,11 +150,9 @@
 
     <footer>
         <p>Desenvolvido por NordicManX, com Clean Code e Café.</p>
-
         <div class="system-status">
-            <i class="fas fa-wifi"></i> SYSTEM ONLINE
-            <span class="separator">|</span>
-            <i class="fas fa-eye"></i> <span id="visit-count">Loading...</span> Acessos
+            <i class="fas fa-wifi"></i> SYSTEM ONLINE <span class="separator">|</span>
+            <i class="fas fa-eye"></i> <span id="visit-count">...</span> Acessos
         </div>
     </footer>
 

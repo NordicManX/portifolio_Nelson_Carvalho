@@ -1,12 +1,10 @@
-/* --- ARQUIVO: style.css (Versão Final Corrigida) --- */
-
 /* --- VARIÁVEIS & RESET --- */
 :root {
     --bg-color: #0a0a0a;
-    --card-bg: rgba(30, 30, 30, 0.7);
     --text-main: #e0e0e0;
     --text-secondary: #94a3b8;
     --neon-blue: #00f3ff;
+    --neon-red: #ff0055;
     --neon-glow: 0 0 10px rgba(0, 243, 255, 0.5);
     --font-main: 'Segoe UI', sans-serif;
     --font-mono: 'Courier New', monospace;
@@ -20,14 +18,12 @@
 
 body {
     background-color: transparent;
-    /* Transparente para ver o canvas */
     color: var(--text-main);
     font-family: var(--font-main);
     overflow-x: hidden;
     position: relative;
 }
 
-/* --- FUNDO DE PARTÍCULAS (CANVAS) --- */
 #particles {
     position: fixed;
     top: 0;
@@ -35,13 +31,9 @@ body {
     width: 100%;
     height: 100%;
     z-index: 0;
-    /* Fica no fundo */
     background-color: var(--bg-color);
-    /* Cor de fundo real */
 }
 
-/* --- CONTEÚDO GERAL (Acima do Canvas) --- */
-/* Removemos o 'header' daqui pois ele tem regra própria abaixo */
 .hero,
 .skills-section,
 .projects-section,
@@ -51,26 +43,19 @@ footer {
     z-index: 2;
 }
 
-/* --- HEADER (CORRIGIDO) --- */
+/* --- HEADER --- */
 header {
-    /* Fixação */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 100;
-    /* Acima de tudo */
-
-    /* Layout Flexbox (O que estava faltando) */
     display: flex;
     justify-content: space-between;
-    /* Empurra Logo p/ esq e Ícones p/ dir */
     align-items: center;
-
-    /* Estilo */
     padding: 1.5rem 8%;
-    background: rgba(10, 10, 10, 0.5);
-    backdrop-filter: blur(10px);
+    background: rgba(10, 10, 10, 0.6);
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -84,22 +69,276 @@ header {
 
 .social-nav {
     display: flex;
+    align-items: center;
     gap: 20px;
 }
 
-.social-nav a {
+/* Ícones Desktop */
+.desktop-icons {
+    display: flex;
+    gap: 20px;
+}
+
+.desktop-icons a {
     color: var(--text-secondary);
     font-size: 1.3rem;
     transition: 0.3s;
 }
 
-.social-nav a:hover {
+.desktop-icons a:hover {
     color: var(--neon-blue);
     text-shadow: var(--neon-glow);
     transform: scale(1.2);
 }
 
-/* --- HERO SECTION --- */
+/* Botão Hambúrguer */
+.hamburger-icon {
+    background: transparent;
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue);
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: 0.3s;
+    z-index: 2001;
+}
+
+.hamburger-icon:hover {
+    background: var(--neon-blue);
+    color: #000;
+    box-shadow: var(--neon-glow);
+}
+
+/* --- MENU LATERAL --- */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(15, 15, 15, 0.98);
+    backdrop-filter: blur(20px);
+    z-index: 2000;
+    transform: translateY(-100%);
+    /* Escondido em cima */
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 2px solid var(--neon-blue);
+}
+
+.side-menu.active {
+    transform: translateY(0);
+    box-shadow: 0 10px 50px rgba(0, 243, 255, 0.2);
+}
+
+.close-btn-menu {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 2.5rem;
+    cursor: pointer;
+    transition: 0.3s;
+    z-index: 2002;
+}
+
+.close-btn-menu:hover {
+    color: var(--neon-blue);
+    transform: rotate(90deg);
+}
+
+.menu-content {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: 0.3s delay 0.2s;
+}
+
+.side-menu.active .menu-content {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.menu-content h3 {
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: 3px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+.menu-content a {
+    display: block;
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    transition: 0.3s;
+}
+
+.menu-content a:hover {
+    color: var(--neon-blue);
+    transform: scale(1.1);
+    text-shadow: 0 0 15px var(--neon-blue);
+}
+
+.menu-divider {
+    border: 0;
+    border-top: 1px solid #333;
+    margin: 2rem auto;
+    width: 50px;
+}
+
+.private-link {
+    color: var(--neon-red) !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.private-link:hover {
+    text-shadow: 0 0 10px var(--neon-red);
+}
+
+.logout-link {
+    color: var(--neon-red) !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.logout-link:hover {
+    text-shadow: 0 0 10px var(--neon-red);
+}
+
+.mobile-socials {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.mobile-socials a {
+    font-size: 2rem;
+    color: var(--text-secondary);
+    transition: 0.3s;
+}
+
+.mobile-socials a:hover {
+    color: var(--neon-blue);
+    transform: scale(1.2);
+}
+
+/* --- MODAL DE LOGIN --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 3000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background: #121212;
+    width: 90%;
+    max-width: 400px;
+    border: 1px solid var(--neon-blue);
+    border-radius: 8px;
+    box-shadow: 0 0 40px rgba(0, 243, 255, 0.1);
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+    padding: 0;
+    overflow: hidden;
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+.login-content {
+    border-color: var(--neon-blue);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 243, 255, 0.05);
+}
+
+.modal-header h3 {
+    font-family: var(--font-mono);
+    color: var(--neon-blue);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.close-btn:hover {
+    color: #fff;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-body p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    font-family: var(--font-mono);
+    text-align: center;
+}
+
+.btn-login {
+    width: 100%;
+    margin-top: 10px;
+    border-color: var(--neon-red);
+    color: var(--neon-red);
+}
+
+.btn-login:hover {
+    background: var(--neon-red);
+    color: #fff;
+    box-shadow: 0 0 20px var(--neon-red);
+}
+
+/* --- RESTO DO SITE --- */
 .hero {
     height: 100vh;
     display: flex;
@@ -107,7 +346,6 @@ header {
     justify-content: center;
     padding: 0 10%;
     position: relative;
-    /* Garante z-index */
 }
 
 .glitch-text {
@@ -143,7 +381,6 @@ header {
     }
 }
 
-/* --- SKILLS (LADO A LADO) --- */
 .skills-section {
     padding: 2rem 10%;
     margin-bottom: 2rem;
@@ -164,7 +401,6 @@ header {
     align-items: center;
     justify-content: center;
     gap: 10px;
-
     padding: 10px 20px;
     border: 1px solid var(--neon-blue);
     color: var(--text-main);
@@ -176,12 +412,6 @@ header {
     cursor: default;
 }
 
-.skill-tag i {
-    font-size: 1.2rem;
-    color: var(--neon-blue);
-    transition: 0.3s;
-}
-
 .skill-tag:hover {
     background: var(--neon-blue);
     color: #0a0a0a;
@@ -189,11 +419,16 @@ header {
     transform: translateY(-3px);
 }
 
+.skill-tag i {
+    font-size: 1.2rem;
+    color: var(--neon-blue);
+    transition: 0.3s;
+}
+
 .skill-tag:hover i {
     color: #0a0a0a;
 }
 
-/* --- REPOSITÓRIOS (HUD) --- */
 .projects-section {
     padding: 4rem 10%;
 }
@@ -218,7 +453,6 @@ header {
     gap: 1.5rem;
 }
 
-/* Card */
 .repo-card {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
     border: 1px solid rgba(0, 243, 255, 0.2);
@@ -231,6 +465,12 @@ header {
     text-decoration: none;
 }
 
+.repo-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+}
+
 .repo-card::before {
     content: '';
     position: absolute;
@@ -240,13 +480,6 @@ header {
     height: 100%;
     background: var(--text-secondary);
     transition: 0.3s;
-}
-
-.repo-card:hover {
-    transform: translateY(-5px);
-    background: rgba(0, 243, 255, 0.05);
-    border-color: var(--neon-blue);
-    box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
 }
 
 .repo-card:hover::before {
@@ -325,7 +558,6 @@ header {
     text-shadow: 0 0 5px var(--neon-blue);
 }
 
-/* Paginação */
 .pagination-controls {
     display: flex;
     justify-content: center;
@@ -362,12 +594,10 @@ header {
     opacity: 0.5;
 }
 
-#page-info {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+.repo-card {
+    animation: fadeInUp 0.5s ease forwards;
 }
 
-/* Animação Fade In */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -380,11 +610,6 @@ header {
     }
 }
 
-.repo-card {
-    animation: fadeInUp 0.5s ease forwards;
-}
-
-/* --- CONTATO --- */
 .contact-section {
     padding: 4rem 10%;
     position: relative;
@@ -420,7 +645,6 @@ header {
     resize: none;
 }
 
-/* Correção do Autofill (Fundo Branco) */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -503,7 +727,6 @@ textarea:-webkit-autofill:focus {
     text-shadow: 0 0 5px #ff0055;
 }
 
-/* Tela Sucesso */
 .success-message {
     text-align: center;
     padding: 2rem;
@@ -546,7 +769,6 @@ textarea:-webkit-autofill:focus {
     box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
 }
 
-/* Footer & Contador */
 footer {
     text-align: center;
     padding: 3rem;
@@ -579,7 +801,6 @@ footer {
     color: #333;
 }
 
-/* --- RESPONSIVIDADE --- */
 @media (max-width: 1024px) {
     .hero h1 {
         font-size: 3.5rem;
@@ -604,22 +825,8 @@ footer {
         padding-right: 5%;
     }
 
-    /* Header Mobile */
-    header {
-        flex-direction: column;
-        gap: 15px;
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-        background: rgba(10, 10, 10, 0.9);
-        /* Fundo mais escuro no mobile */
-    }
-
-    .social-nav {
-        gap: 25px;
-    }
-
-    .social-nav a {
-        font-size: 1.5rem;
+    .desktop-icons {
+        display: none;
     }
 
     .hero {
@@ -635,23 +842,7 @@ footer {
         line-height: 1.1;
     }
 
-    .typewriter {
-        font-size: 1.1rem;
-        margin-top: 10px;
-        min-height: 3em;
-    }
-
     .skills-grid {
-        justify-content: center;
-    }
-
-    .skill-tag {
-        font-size: 0.8rem;
-        padding: 6px 12px;
-    }
-
-    .section-title {
-        font-size: 1.8rem;
         justify-content: center;
     }
 
@@ -660,41 +851,14 @@ footer {
         gap: 1.5rem;
     }
 
-    .repo-card {
-        padding: 1.2rem;
-    }
-
-    .pagination-controls {
-        flex-direction: row;
-        gap: 10px;
-        font-size: 0.8rem;
-    }
-
-    .btn-tech {
-        padding: 8px 12px;
-    }
-
     .contact-container {
         padding: 1.5rem;
         width: 100%;
-    }
-
-    .btn-submit {
-        font-size: 0.9rem;
-        padding: 12px;
     }
 }
 
 @media (max-width: 380px) {
     .hero h1 {
         font-size: 2rem;
-    }
-
-    .typewriter {
-        font-size: 0.9rem;
-    }
-
-    .social-nav {
-        gap: 15px;
     }
 }

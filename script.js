@@ -1,7 +1,9 @@
 /* --- 1. CONFIGURAÇÃO GERAL --- */
 const githubUsername = 'NordicManX';
-const skillsContainer = document.getElementById('skills-container');
 
+/* --- 2. RENDERIZAÇÃO DAS SKILLS (PRIORIDADE) --- */
+// Colocamos no topo para garantir que carregue rápido no mobile
+const skillsContainer = document.getElementById('skills-container');
 const techStack = [
     { name: "Golang", icon: "fab fa-golang" },
     { name: "Python", icon: "fab fa-python" },
@@ -19,7 +21,7 @@ const techStack = [
 ];
 
 if (skillsContainer) {
-    skillsContainer.innerHTML = ''; // Limpa antes de renderizar
+    skillsContainer.innerHTML = '';
     techStack.forEach(skill => {
         const tag = document.createElement('div');
         tag.className = 'skill-tag';
@@ -28,7 +30,91 @@ if (skillsContainer) {
     });
 }
 
-/* --- 2. EFEITO DIGITAÇÃO (TYPEWRITER) --- */
+/* --- 3. CONTROLES DE NAVEGAÇÃO (MENU & LOGIN) --- */
+const sideMenu = document.getElementById('side-menu');
+const hamburgerBtn = document.getElementById('hamburger-btn');
+const closeMenuBtn = document.getElementById('close-menu');
+
+const loginModal = document.getElementById('login-modal');
+const closeLoginBtn = document.getElementById('close-login');
+
+// Botões de Ação do Menu
+const menuLoginBtn = document.getElementById('menu-login-btn');
+const menuConfigBtn = document.getElementById('menu-config-btn');
+const menuLogoutBtn = document.getElementById('menu-logout-btn');
+
+// Funções de Abrir/Fechar
+function toggleMenu() { sideMenu.classList.toggle('active'); }
+function closeMenu() { sideMenu.classList.remove('active'); }
+
+// Event Listeners do Menu
+if (hamburgerBtn) hamburgerBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleMenu();
+});
+
+if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
+
+// Event Listeners das Opções do Menu
+if (menuLoginBtn) {
+    menuLoginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeMenu();
+        loginModal.classList.add('active');
+    });
+}
+
+if (menuConfigBtn) {
+    menuConfigBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert("Painel de Configurações em desenvolvimento.");
+        closeMenu();
+    });
+}
+
+if (menuLogoutBtn) {
+    menuLogoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert("Sessão encerrada.");
+        closeMenu();
+    });
+}
+
+// Controles do Modal de Login
+if (closeLoginBtn) {
+    closeLoginBtn.addEventListener('click', () => loginModal.classList.remove('active'));
+}
+
+// Fechar ao clicar fora (Overlay)
+window.addEventListener('click', (e) => {
+    if (e.target === loginModal) loginModal.classList.remove('active');
+    if (e.target === sideMenu) closeMenu();
+});
+
+/* --- LÓGICA DE LOGIN (SIMULAÇÃO) --- */
+const loginForm = document.getElementById('login-form');
+if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const msg = document.getElementById('login-msg');
+
+        msg.innerHTML = 'Conectando ao servidor seguro <i class="fas fa-spinner fa-spin"></i>';
+
+        setTimeout(() => {
+            if (user === 'admin' && pass === '1234') {
+                msg.innerHTML = 'Acesso Autorizado.';
+                msg.style.color = '#00ff88';
+            } else {
+                msg.innerHTML = 'Acesso Negado.';
+                msg.style.color = '#ff0055';
+            }
+        }, 1500);
+    });
+}
+
+/* --- 4. EFEITO DIGITAÇÃO --- */
 const texts = ["Soluções Backend", "APIs Robustas", "Sistemas Web", "Automação", "Nordic Tech"];
 let count = 0;
 let index = 0;
@@ -42,35 +128,26 @@ let letter = "";
     if (count === texts.length) count = 0;
     currentText = texts[count];
     letter = currentText.slice(0, ++index);
-
     typingElement.textContent = letter;
 
     if (letter.length === currentText.length) {
-        count++;
-        index = 0;
-        setTimeout(type, 2000);
-    } else {
-        setTimeout(type, 100);
-    }
+        count++; index = 0; setTimeout(type, 2000);
+    } else { setTimeout(type, 100); }
 })();
 
-/* --- 3. GITHUB API COM PAGINAÇÃO --- */
-let allRepos = [];
-let currentPage = 1;
-const itemsPerPage = 8;
+/* --- 5. GITHUB API --- */
+let allRepos = []; let currentPage = 1; const itemsPerPage = 8;
 
 async function getRepos() {
     const container = document.getElementById('repos-container');
     if (!container) return;
-
     try {
         const response = await fetch(`https://api.github.com/users/${githubUsername}/repos?sort=updated&per_page=100`);
         if (!response.ok) throw new Error('Erro na requisição');
         allRepos = await response.json();
         renderPage(1);
     } catch (e) {
-        container.innerHTML = `<p style="color: #ff4444; font-family: monospace;">Erro ao carregar repositórios. Verifique a conexão.</p>`;
-        console.error(e);
+        container.innerHTML = `<p style="color: #ff4444; font-family: monospace;">Erro ao carregar repositórios.</p>`;
     }
 }
 
@@ -89,7 +166,6 @@ function renderPage(page) {
         card.target = "_blank";
         card.className = 'repo-card';
         card.style.animationDelay = `${index * 0.1}s`;
-
         const description = repo.description ? repo.description : 'Projeto desenvolvido com foco em tecnologia e performance.';
 
         card.innerHTML = `
@@ -99,17 +175,10 @@ function renderPage(page) {
             </div>
             <p class="repo-desc">${description}</p>
             <div class="repo-stats">
-                <div class="stat-item">
-                    <i class="fas fa-circle" style="font-size: 6px;"></i>
-                    ${repo.language || 'Code'}
-                </div>
-                <div class="stat-item">
-                    <i class="fas fa-star"></i>
-                    ${repo.stargazers_count}
-                </div>
+                <div class="stat-item"><i class="fas fa-circle" style="font-size: 6px;"></i> ${repo.language || 'Code'}</div>
+                <div class="stat-item"><i class="fas fa-star"></i> ${repo.stargazers_count}</div>
                 <div class="repo-link">View Code &rarr;</div>
-            </div>
-        `;
+            </div>`;
         container.appendChild(card);
     });
     updatePaginationControls();
@@ -118,7 +187,6 @@ function renderPage(page) {
 function changePage(direction) {
     const totalPages = Math.ceil(allRepos.length / itemsPerPage);
     const nextPage = currentPage + direction;
-
     if (nextPage >= 1 && nextPage <= totalPages) {
         currentPage = nextPage;
         renderPage(currentPage);
@@ -138,7 +206,7 @@ function updatePaginationControls() {
 }
 getRepos();
 
-/* --- 4. FUNDO: SPOTLIGHT AUTOMÁTICO & TOUCH FIX (IPHONE) --- */
+/* --- 6. FUNDO DE PARTÍCULAS (AUTOMÁTICO + REPULSÃO) --- */
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 
@@ -147,39 +215,22 @@ if (canvas) {
     let particles = [];
     let timeCycle = 0;
 
+    // Variáveis de Controle
     let isMobile = false;
     let isTouching = false;
 
+    // Começa no CENTRO (Fix tela preta iPhone)
     let mouse = {
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
         baseRadius: 400
     };
 
-    window.addEventListener('mousemove', (e) => {
-        mouse.x = e.x;
-        mouse.y = e.y;
-        isTouching = true;
-    });
-
-    window.addEventListener('touchstart', (e) => {
-        isTouching = true;
-        if (e.touches.length > 0) {
-            mouse.x = e.touches[0].clientX;
-            mouse.y = e.touches[0].clientY;
-        }
-    }, { passive: false });
-
-    window.addEventListener('touchmove', (e) => {
-        if (e.touches.length > 0) {
-            mouse.x = e.touches[0].clientX;
-            mouse.y = e.touches[0].clientY;
-        }
-    }, { passive: false });
-
-    window.addEventListener('touchend', () => {
-        isTouching = false;
-    });
+    // EVENTOS
+    window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; isTouching = true; });
+    window.addEventListener('touchstart', (e) => { isTouching = true; if (e.touches.length > 0) { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; } }, { passive: false });
+    window.addEventListener('touchmove', (e) => { if (e.touches.length > 0) { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; } }, { passive: false });
+    window.addEventListener('touchend', () => { isTouching = false; });
 
     class Particle {
         constructor(x, y) {
@@ -192,6 +243,7 @@ if (canvas) {
         }
 
         draw() {
+            // Usa posição segura se mouse falhar
             let mx = mouse.x || w / 2;
             let my = mouse.y || h / 2;
 
@@ -199,6 +251,7 @@ if (canvas) {
             let dy = my - this.originY;
             let distance = Math.sqrt(dx * dx + dy * dy);
 
+            // Efeitos Visuais (Ondas e Respiração)
             let breathing = Math.sin(timeCycle * 0.02) * 30;
             let dynamicBaseRadius = mouse.baseRadius + breathing;
 
@@ -229,30 +282,32 @@ if (canvas) {
         }
 
         update() {
+            // 1. Drift Natural
             let driftX = Math.sin(timeCycle * this.driftSpeedX + this.originX) * this.driftRange;
             let driftY = Math.cos(timeCycle * this.driftSpeedY + this.originY) * this.driftRange;
-
             let targetX = this.originX + driftX;
             let targetY = this.originY + driftY;
 
+            // 2. Interação com Mouse (Repulsão)
             let mx = mouse.x || w / 2;
             let my = mouse.y || h / 2;
-
             let dx = mx - this.originX;
             let dy = my - this.originY;
             let distance = Math.sqrt(dx * dx + dy * dy);
 
-            let ease = 0.02;
+            let ease = 0.02; // Retorno lento (Gelatina)
 
             if (distance < mouse.baseRadius) {
                 let angle = Math.atan2(dy, dx);
                 let force = (mouse.baseRadius - distance) / mouse.baseRadius;
                 let push = force * (mouse.baseRadius * 0.4);
 
+                // Subtrai para empurrar para longe (Repulsão)
                 targetX -= Math.cos(angle) * push;
                 targetY -= Math.sin(angle) * push;
-                ease = 0.1;
+                ease = 0.1; // Reação rápida ao empurrão
             }
+
             this.x += (targetX - this.x) * ease;
             this.y += (targetY - this.y) * ease;
         }
@@ -263,14 +318,14 @@ if (canvas) {
         h = canvas.height = window.innerHeight;
         particles = [];
 
+        // Detecção Mobile
         isMobile = (w < 768) || ('ontouchstart' in window);
+
         const spacing = isMobile ? 45 : 35;
         mouse.baseRadius = isMobile ? 180 : 400;
 
-        if (!isTouching) {
-            mouse.x = w / 2;
-            mouse.y = h / 2;
-        }
+        // Garante que começa no centro
+        if (!isTouching) { mouse.x = w / 2; mouse.y = h / 2; }
 
         for (let y = 0; y < h; y += spacing) {
             for (let x = 0; x < w; x += spacing) {
@@ -283,46 +338,36 @@ if (canvas) {
         ctx.clearRect(0, 0, w, h);
         timeCycle += 1.5;
 
+        // MODO AUTOMÁTICO (GHOST MOUSE)
         if (!isTouching) {
+            // Movimento suave infinito no centro
             let moveX = Math.sin(timeCycle * 0.01) * (w * 0.3);
             let moveY = Math.cos(timeCycle * 0.015) * (h * 0.2);
 
             let targetX = (w / 2) + moveX;
             let targetY = (h / 2) + moveY;
 
+            // Suaviza o movimento do mouse fantasma
             mouse.x += (targetX - mouse.x) * 0.05;
             mouse.y += (targetY - mouse.y) * 0.05;
         }
 
-        particles.forEach(p => {
-            p.update();
-            p.draw();
-        });
+        particles.forEach(p => { p.update(); p.draw(); });
         requestAnimationFrame(animate);
     }
 
     let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(init, 100);
-    });
-
-    init();
-    animate();
+    window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(init, 100); });
+    init(); animate();
 }
 
-/* --- 5. ENVIO DE FORMULÁRIO (VIA EMAILJS) --- */
+/* --- 7. ENVIO DE FORMULÁRIO (EMAILJS) --- */
 const contactForm = document.getElementById("contact-form");
-
 if (contactForm) {
     contactForm.addEventListener("submit", function (event) {
         event.preventDefault();
-
-        // --- CONFIGURAÇÃO ---
         const serviceID = "service_kjolmgl";
         const templateID = "template_gt38aha";
-        // --------------------
-
         const statusMsg = document.getElementById("form-status");
         const submitBtn = contactForm.querySelector('.btn-submit');
         const originalBtnText = submitBtn.innerHTML;
@@ -330,44 +375,26 @@ if (contactForm) {
         submitBtn.innerHTML = 'Enviando... <i class="fas fa-spinner fa-spin"></i>';
         submitBtn.disabled = true;
 
-        emailjs.sendForm(serviceID, templateID, this)
-            .then(() => {
-                contactForm.innerHTML = `
-                    <div class="success-message">
-                        <i class="fas fa-check-circle"></i>
-                        <h3>Transmissão Confirmada</h3>
-                        <p>Um email de confirmação foi enviado para sua caixa de entrada.</p>
-                        <button onclick="location.reload()" class="btn-tech-small">Nova Mensagem</button>
-                    </div>
-                `;
-            }, (err) => {
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-                statusMsg.innerHTML = "Falha no envio. Verifique as chaves do EmailJS.";
-                statusMsg.classList.add('error');
-                console.error('Erro EmailJS:', err);
-            });
+        emailjs.sendForm(serviceID, templateID, this).then(() => {
+            contactForm.innerHTML = `
+                <div class="success-message">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Transmissão Confirmada</h3>
+                    <p>Um email de confirmação foi enviado para sua caixa de entrada.</p>
+                    <button onclick="location.reload()" class="btn-tech-small">Nova Mensagem</button>
+                </div>`;
+        }, (err) => {
+            submitBtn.innerHTML = originalBtnText; submitBtn.disabled = false;
+            statusMsg.innerHTML = "Falha no envio."; statusMsg.classList.add('error');
+        });
     });
 }
 
-/* --- 7. CONTADOR DE VISITAS (NOVA API: CounterAPI) --- */
+/* --- 8. CONTADOR DE VISITAS --- */
 const counterElement = document.getElementById('visit-count');
-
 if (counterElement) {
-    const namespace = 'nordicmanx-portfolio';
-    const key = 'visits';
-
-    // URL diferente: api.counterapi.dev
-    // O final "/up" serve para contar +1 cada vez que carrega
+    const namespace = 'nordicmanx-portfolio'; const key = 'visits';
     fetch(`https://api.counterapi.dev/v1/${namespace}/${key}/up`)
-        .then(response => response.json())
-        .then(data => {
-            // Nesta API, o número vem dentro de "count"
-            counterElement.innerText = data.count;
-        })
-        .catch(error => {
-            console.error('Erro no contador:', error);
-            // Se der erro (bloqueador de anúncio, etc), mostra um valor fixo "Start"
-            counterElement.innerText = "1";
-        });
+        .then(response => response.json()).then(data => { counterElement.innerText = data.count; })
+        .catch(error => { counterElement.innerText = "1"; });
 }
