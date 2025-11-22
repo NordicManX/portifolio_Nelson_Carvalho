@@ -109,7 +109,7 @@ function updatePaginationControls() {
 }
 getRepos();
 
-/* --- 4. FUNDO: RESPONSIVO, REPULSÃO & MODO AUTOMÁTICO MOBILE --- */
+/* --- 4. FUNDO: SPOTLIGHT AUTOMÁTICO & TOUCH FIX (IPHONE) --- */
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 
@@ -118,37 +118,46 @@ if (canvas) {
     let particles = [];
     let timeCycle = 0;
 
-    // Variáveis novas para o modo automático
+    // Variáveis de Estado
     let isMobile = false;
     let isTouching = false;
 
-    let mouse = { x: -1000, y: -1000, baseRadius: 400 };
+    // CONFIGURAÇÃO INICIAL DO MOUSE
+    // TRUQUE: Começa no CENTRO da tela, não fora (-1000).
+    // Assim o usuário vê a luz imediatamente ao carregar.
+    let mouse = {
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2,
+        baseRadius: 400
+    };
 
-    // --- EVENTOS DE MOUSE (PC) ---
+    // --- EVENTOS (PC) ---
     window.addEventListener('mousemove', (e) => {
         mouse.x = e.x;
         mouse.y = e.y;
+        isTouching = true; // Considera uso ativo
     });
 
-    // --- EVENTOS DE TOQUE (MOBILE) ---
+    // --- EVENTOS (MOBILE) ---
+    // Adicionei 'passive: false' para garantir que o browser não ignore o script
     window.addEventListener('touchstart', (e) => {
-        isTouching = true; // Marca que o usuário está tocando
+        isTouching = true;
         if (e.touches.length > 0) {
             mouse.x = e.touches[0].clientX;
             mouse.y = e.touches[0].clientY;
         }
-    }, { passive: true });
+    }, { passive: false });
 
     window.addEventListener('touchmove', (e) => {
         if (e.touches.length > 0) {
             mouse.x = e.touches[0].clientX;
             mouse.y = e.touches[0].clientY;
         }
-    }, { passive: true });
+    }, { passive: false });
 
     window.addEventListener('touchend', () => {
-        isTouching = false; // Usuário soltou a tela
-        // Não resetamos mouse.x para permitir transição suave
+        isTouching = false;
+        // Ao soltar, ele volta suavemente para o modo automático
     });
 
     class Particle {
@@ -156,16 +165,22 @@ if (canvas) {
             this.x = x; this.y = y;
             this.originX = x; this.originY = y;
             this.baseSize = 1.5;
+            // Drift (Vida própria)
             this.driftSpeedX = Math.random() * 0.02 + 0.01;
             this.driftSpeedY = Math.random() * 0.02 + 0.01;
             this.driftRange = Math.random() * 5 + 3;
         }
 
         draw() {
-            let dx = mouse.x - this.originX;
-            let dy = mouse.y - this.originY;
+            // Se o mouse não estiver definido (erro de load), usa o centro
+            let mx = mouse.x || w / 2;
+            let my = mouse.y || h / 2;
+
+            let dx = mx - this.originX;
+            let dy = my - this.originY;
             let distance = Math.sqrt(dx * dx + dy * dy);
 
+            // Efeitos de Onda e Pulsação
             let breathing = Math.sin(timeCycle * 0.02) * 30;
             let dynamicBaseRadius = mouse.baseRadius + breathing;
 
@@ -181,6 +196,9 @@ if (canvas) {
             alpha = Math.max(0, alpha);
 
             let currentSize = this.baseSize + (edgeFactor * 3);
+
+            // COR: Garante que alpha é um número válido
+            if (isNaN(alpha)) alpha = 1;
             let color = `rgba(0, 243, 255, ${alpha})`;
 
             ctx.save();
@@ -201,8 +219,12 @@ if (canvas) {
             let targetX = this.originX + driftX;
             let targetY = this.originY + driftY;
 
-            let dx = mouse.x - this.originX;
-            let dy = mouse.y - this.originY;
+            // Proteção contra valores nulos
+            let mx = mouse.x || w / 2;
+            let my = mouse.y || h / 2;
+
+            let dx = mx - this.originX;
+            let dy = my - this.originY;
             let distance = Math.sqrt(dx * dx + dy * dy);
 
             let ease = 0.02;
@@ -226,11 +248,18 @@ if (canvas) {
         h = canvas.height = window.innerHeight;
         particles = [];
 
-        // Verifica se é mobile
-        isMobile = w < 768;
+        // Detecção Mobile mais robusta
+        isMobile = (w < 768) || ('ontouchstart' in window);
 
-        const spacing = isMobile ? 50 : 35;
-        mouse.baseRadius = isMobile ? 150 : 400;
+        // No mobile, menos pontos e raio menor para performance
+        const spacing = isMobile ? 45 : 35;
+        mouse.baseRadius = isMobile ? 180 : 400;
+
+        // Garante que o mouse comece no centro se recarregar a página
+        if (!isTouching) {
+            mouse.x = w / 2;
+            mouse.y = h / 2;
+        }
 
         for (let y = 0; y < h; y += spacing) {
             for (let x = 0; x < w; x += spacing) {
@@ -243,11 +272,20 @@ if (canvas) {
         ctx.clearRect(0, 0, w, h);
         timeCycle += 1.5;
 
-        // --- LÓGICA AUTOMÁTICA PARA MOBILE ---
-        // Se for celular E ninguém estiver tocando, a luz se mexe sozinha
-        if (isMobile && !isTouching) {
-            mouse.x = (w / 2) + Math.sin(timeCycle * 0.01) * (w / 3);
-            mouse.y = (h / 2) + Math.cos(timeCycle * 0.015) * (h / 4);
+        // MODO AUTOMÁTICO (GHOST MOUSE)
+        // Se ninguém está tocando (e for mobile ou PC ocioso), a luz passeia sozinha
+        if (!isTouching) {
+            // Movimento suave em "8" no centro da tela
+            let moveX = Math.sin(timeCycle * 0.01) * (w * 0.3);
+            let moveY = Math.cos(timeCycle * 0.015) * (h * 0.2);
+
+            // Alvo do movimento automático
+            let targetX = (w / 2) + moveX;
+            let targetY = (h / 2) + moveY;
+
+            // Interpolação suave para o mouse não "pular" quando solta o dedo
+            mouse.x += (targetX - mouse.x) * 0.05;
+            mouse.y += (targetY - mouse.y) * 0.05;
         }
 
         particles.forEach(p => {
@@ -257,7 +295,13 @@ if (canvas) {
         requestAnimationFrame(animate);
     }
 
-    window.addEventListener('resize', () => { setTimeout(init, 100); });
+    // Otimização de Resize (Debounce) para evitar travar no celular
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(init, 100);
+    });
+
     init();
     animate();
 }
