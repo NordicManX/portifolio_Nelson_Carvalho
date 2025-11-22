@@ -119,22 +119,35 @@ if (canvas) {
     let timeCycle = 0;
     let mouse = { x: -1000, y: -1000, baseRadius: 400 };
 
+    // --- EVENTOS DE MOUSE (PC) ---
     window.addEventListener('mousemove', (e) => {
         mouse.x = e.x;
         mouse.y = e.y;
     });
 
+    // --- EVENTOS DE TOQUE (MOBILE) ---
+
+    // 1. Quando o dedo TOCA na tela (TouchStart)
+    window.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) {
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+        }
+    }, { passive: true });
+
+    // 2. Quando o dedo ARRASTA na tela (TouchMove)
     window.addEventListener('touchmove', (e) => {
         if (e.touches.length > 0) {
             mouse.x = e.touches[0].clientX;
             mouse.y = e.touches[0].clientY;
         }
-    });
+    }, { passive: true });
 
+    // 3. Quando o dedo SAI da tela (TouchEnd)
     window.addEventListener('touchend', () => {
-        mouse.x = -1000; mouse.y = -1000;
+        mouse.x = -1000;
+        mouse.y = -1000;
     });
-
     class Particle {
         constructor(x, y) {
             this.x = x; this.y = y;
