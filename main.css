@@ -1,4 +1,4 @@
-/* --- ARQUIVO: style.css (Versão Final Completa) --- */
+/* --- ARQUIVO: style.css (Versão Final Corrigida) --- */
 
 /* --- VARIÁVEIS & RESET --- */
 :root {
@@ -20,14 +20,14 @@
 
 body {
     background-color: transparent;
-    /* Antes era var(--bg-color) */
+    /* Transparente para ver o canvas */
     color: var(--text-main);
     font-family: var(--font-main);
     overflow-x: hidden;
     position: relative;
 }
 
-/* --- FUNDO DE PARTÍCULAS --- */
+/* --- FUNDO DE PARTÍCULAS (CANVAS) --- */
 #particles {
     position: fixed;
     top: 0;
@@ -35,22 +35,43 @@ body {
     width: 100%;
     height: 100%;
     z-index: 0;
-    /* MUDANÇA CRUCIAL: De -1 para 0 */
+    /* Fica no fundo */
     background-color: var(--bg-color);
-    /* A cor vem para cá */
+    /* Cor de fundo real */
 }
 
-/* --- HEADER --- */
-header,
+/* --- CONTEÚDO GERAL (Acima do Canvas) --- */
+/* Removemos o 'header' daqui pois ele tem regra própria abaixo */
 .hero,
 .skills-section,
 .projects-section,
 .contact-section,
 footer {
     position: relative;
-    /* Necessário para o z-index funcionar */
     z-index: 2;
-    /* Fica acima do canvas (0) */
+}
+
+/* --- HEADER (CORRIGIDO) --- */
+header {
+    /* Fixação */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    /* Acima de tudo */
+
+    /* Layout Flexbox (O que estava faltando) */
+    display: flex;
+    justify-content: space-between;
+    /* Empurra Logo p/ esq e Ícones p/ dir */
+    align-items: center;
+
+    /* Estilo */
+    padding: 1.5rem 8%;
+    background: rgba(10, 10, 10, 0.5);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .logo {
@@ -86,6 +107,7 @@ footer {
     justify-content: center;
     padding: 0 10%;
     position: relative;
+    /* Garante z-index */
 }
 
 .glitch-text {
@@ -121,7 +143,7 @@ footer {
     }
 }
 
-/* --- SKILLS (CORRIGIDO: LADO A LADO) --- */
+/* --- SKILLS (LADO A LADO) --- */
 .skills-section {
     padding: 2rem 10%;
     margin-bottom: 2rem;
@@ -130,20 +152,15 @@ footer {
 
 .skills-grid {
     display: flex;
-    /* Flexbox */
     flex-wrap: wrap;
-    /* Permite quebrar linha */
     justify-content: center;
-    /* Centraliza tudo */
     gap: 15px;
     margin-top: 20px;
 }
 
 .skill-tag {
     width: auto;
-    /* Tamanho automático */
     display: inline-flex;
-    /* Lado a lado */
     align-items: center;
     justify-content: center;
     gap: 10px;
@@ -176,7 +193,7 @@ footer {
     color: #0a0a0a;
 }
 
-/* --- REPOSITÓRIOS (DESIGN HUD) --- */
+/* --- REPOSITÓRIOS (HUD) --- */
 .projects-section {
     padding: 4rem 10%;
 }
@@ -201,7 +218,7 @@ footer {
     gap: 1.5rem;
 }
 
-/* Card Base */
+/* Card */
 .repo-card {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
     border: 1px solid rgba(0, 243, 255, 0.2);
@@ -214,7 +231,6 @@ footer {
     text-decoration: none;
 }
 
-/* Barra Lateral "Tech" */
 .repo-card::before {
     content: '';
     position: absolute;
@@ -226,7 +242,6 @@ footer {
     transition: 0.3s;
 }
 
-/* Hover Effect */
 .repo-card:hover {
     transform: translateY(-5px);
     background: rgba(0, 243, 255, 0.05);
@@ -239,7 +254,6 @@ footer {
     box-shadow: 0 0 10px var(--neon-blue);
 }
 
-/* Cabeçalho do Card */
 .repo-header {
     display: flex;
     justify-content: space-between;
@@ -265,7 +279,6 @@ footer {
     color: var(--neon-blue);
 }
 
-/* Descrição */
 .repo-desc {
     font-size: 0.9rem;
     color: #8b9bb4;
@@ -277,7 +290,6 @@ footer {
     overflow: hidden;
 }
 
-/* Rodapé do Card */
 .repo-stats {
     display: flex;
     align-items: center;
@@ -313,16 +325,7 @@ footer {
     text-shadow: 0 0 5px var(--neon-blue);
 }
 
-/* Footer */
-footer {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* --- PAGINAÇÃO TECH --- */
+/* Paginação */
 .pagination-controls {
     display: flex;
     justify-content: center;
@@ -364,7 +367,7 @@ footer {
     font-size: 0.9rem;
 }
 
-/* --- ANIMAÇÃO DE ENTRADA DOS CARDS --- */
+/* Animação Fade In */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -381,7 +384,7 @@ footer {
     animation: fadeInUp 0.5s ease forwards;
 }
 
-/* --- CONTATO (FORMULÁRIO TECH) --- */
+/* --- CONTATO --- */
 .contact-section {
     padding: 4rem 10%;
     position: relative;
@@ -415,6 +418,19 @@ footer {
     outline: none;
     transition: 0.3s;
     resize: none;
+}
+
+/* Correção do Autofill (Fundo Branco) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-main) !important;
+    -webkit-box-shadow: 0 0 0px 1000px var(--bg-color) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: var(--text-main);
 }
 
 .input-group input:focus,
@@ -487,7 +503,7 @@ footer {
     text-shadow: 0 0 5px #ff0055;
 }
 
-/* --- TELA DE SUCESSO (Pós-Envio) --- */
+/* Tela Sucesso */
 .success-message {
     text-align: center;
     padding: 2rem;
@@ -530,19 +546,40 @@ footer {
     box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+/* Footer & Contador */
+footer {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* --- RESPONSIVIDADE (MOBILE & TABLET) --- */
+.system-status {
+    margin-top: 15px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+.system-status i {
+    color: var(--neon-blue);
+    margin-right: 5px;
+}
+
+.system-status span#visit-count {
+    color: var(--neon-blue);
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+}
+
+.separator {
+    margin: 0 10px;
+    color: #333;
+}
+
+/* --- RESPONSIVIDADE --- */
 @media (max-width: 1024px) {
     .hero h1 {
         font-size: 3.5rem;
@@ -567,12 +604,14 @@ footer {
         padding-right: 5%;
     }
 
+    /* Header Mobile */
     header {
-        background: rgba(10, 10, 10, 0.9);
         flex-direction: column;
         gap: 15px;
         padding-top: 1rem;
         padding-bottom: 1rem;
+        background: rgba(10, 10, 10, 0.9);
+        /* Fundo mais escuro no mobile */
     }
 
     .social-nav {
@@ -658,29 +697,4 @@ footer {
     .social-nav {
         gap: 15px;
     }
-}
-
-/* --- CONTADOR DE VISITAS (RODAPÉ) --- */
-.system-status {
-    margin-top: 15px;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    opacity: 0.8;
-}
-
-.system-status i {
-    color: var(--neon-blue);
-    margin-right: 5px;
-}
-
-.system-status span#visit-count {
-    color: var(--neon-blue);
-    font-weight: bold;
-    text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
-}
-
-.separator {
-    margin: 0 10px;
-    color: #333;
 }
