@@ -19,7 +19,8 @@
 }
 
 body {
-    background-color: var(--bg-color);
+    background-color: transparent;
+    /* Antes era var(--bg-color) */
     color: var(--text-main);
     font-family: var(--font-main);
     overflow-x: hidden;
@@ -33,20 +34,23 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
+    z-index: 0;
+    /* MUDANÇA CRUCIAL: De -1 para 0 */
+    background-color: var(--bg-color);
+    /* A cor vem para cá */
 }
 
 /* --- HEADER --- */
-header {
-    padding: 1.5rem 8%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    backdrop-filter: blur(5px);
-    position: fixed;
-    width: 100%;
-    z-index: 100;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+header,
+.hero,
+.skills-section,
+.projects-section,
+.contact-section,
+footer {
+    position: relative;
+    /* Necessário para o z-index funcionar */
+    z-index: 2;
+    /* Fica acima do canvas (0) */
 }
 
 .logo {
