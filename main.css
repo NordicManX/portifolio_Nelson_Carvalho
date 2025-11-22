@@ -1,3 +1,5 @@
+/* --- ARQUIVO: style.css (Versão Final Completa) --- */
+
 /* --- VARIÁVEIS & RESET --- */
 :root {
     --bg-color: #0a0a0a;
@@ -115,7 +117,7 @@ header {
     }
 }
 
-/* --- SKILLS COM ÍCONES (LADO A LADO) --- */
+/* --- SKILLS (CORRIGIDO: LADO A LADO) --- */
 .skills-section {
     padding: 2rem 10%;
     margin-bottom: 2rem;
@@ -124,23 +126,20 @@ header {
 
 .skills-grid {
     display: flex;
-    /* Ativa o modo flexível */
-    flex-direction: row;
-    /* Força a direção LINHA (lado a lado) */
+    /* Flexbox */
     flex-wrap: wrap;
-    /* Permite quebrar linha se não couber na tela */
+    /* Permite quebrar linha */
     justify-content: center;
-    /* Centraliza o bloco de skills */
+    /* Centraliza tudo */
     gap: 15px;
-    /* Espaço entre elas */
     margin-top: 20px;
 }
 
 .skill-tag {
     width: auto;
-    /* OBRIGATÓRIO: Largura automática baseada no texto */
+    /* Tamanho automático */
     display: inline-flex;
-    /* Comporta-se como um bloco de texto lado a lado */
+    /* Lado a lado */
     align-items: center;
     justify-content: center;
     gap: 10px;
@@ -151,7 +150,6 @@ header {
     font-family: var(--font-mono);
     font-size: 0.9rem;
     border-radius: 4px;
-    /* Se quiser redondo, mude para 50px */
     background: rgba(0, 243, 255, 0.02);
     transition: 0.3s;
     cursor: default;
@@ -163,7 +161,6 @@ header {
     transition: 0.3s;
 }
 
-/* Efeito Hover */
 .skill-tag:hover {
     background: var(--neon-blue);
     color: #0a0a0a;
@@ -321,21 +318,6 @@ footer {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-    .glitch-text {
-        font-size: 2.5rem;
-    }
-
-    header {
-        padding: 1rem 5%;
-    }
-
-    .hero {
-        padding: 0 5%;
-    }
-}
-
 /* --- PAGINAÇÃO TECH --- */
 .pagination-controls {
     display: flex;
@@ -391,11 +373,9 @@ footer {
     }
 }
 
-/* Aplica a animação no card */
 .repo-card {
     animation: fadeInUp 0.5s ease forwards;
 }
-
 
 /* --- CONTATO (FORMULÁRIO TECH) --- */
 .contact-section {
@@ -418,7 +398,6 @@ footer {
     margin-bottom: 2rem;
 }
 
-/* Estilo dos Inputs e Textarea */
 .input-group input,
 .input-group textarea {
     width: 100%;
@@ -432,17 +411,14 @@ footer {
     outline: none;
     transition: 0.3s;
     resize: none;
-    /* Impede redimensionar textarea */
 }
 
-/* Efeito Neon ao focar */
 .input-group input:focus,
 .input-group textarea:focus {
     border-bottom-color: var(--neon-blue);
     box-shadow: 0 10px 10px -10px var(--neon-blue);
 }
 
-/* Labels Flutuantes (Animação) */
 .input-group label {
     position: absolute;
     left: 10px;
@@ -454,7 +430,6 @@ footer {
     transition: 0.3s;
 }
 
-/* Quando o input tem foco ou texto, o label sobe */
 .input-group input:focus~label,
 .input-group input:not(:placeholder-shown)~label,
 .input-group textarea:focus~label,
@@ -466,7 +441,6 @@ footer {
     font-weight: bold;
 }
 
-/* Botão de Enviar */
 .btn-submit {
     width: 100%;
     padding: 15px;
@@ -491,14 +465,12 @@ footer {
     box-shadow: 0 0 20px var(--neon-blue);
 }
 
-/* Mensagem de Status (Sucesso/Erro) */
 .status-msg {
     margin-top: 15px;
     text-align: center;
     font-family: var(--font-mono);
     font-size: 0.9rem;
     height: 20px;
-    /* Reserva espaço */
 }
 
 .success {
@@ -537,7 +509,6 @@ footer {
     font-family: var(--font-mono);
 }
 
-/* Botão pequeno para recarregar se quiser mandar outro */
 .btn-tech-small {
     background: transparent;
     border: 1px solid var(--text-secondary);
@@ -568,10 +539,7 @@ footer {
 }
 
 /* --- RESPONSIVIDADE (MOBILE & TABLET) --- */
-
 @media (max-width: 1024px) {
-
-    /* Tablet e Laptops pequenos */
     .hero h1 {
         font-size: 3.5rem;
     }
@@ -582,14 +550,10 @@ footer {
 }
 
 @media (max-width: 768px) {
-
-    /* --- GERAL --- */
     body {
         font-size: 14px;
-        /* Reduz fonte base */
     }
 
-    /* Ajusta laterais para aproveitar a tela toda */
     header,
     .hero,
     .skills-section,
@@ -599,10 +563,8 @@ footer {
         padding-right: 5%;
     }
 
-    /* --- HEADER --- */
     header {
         background: rgba(10, 10, 10, 0.9);
-        /* Fundo mais escuro para leitura */
         flex-direction: column;
         gap: 15px;
         padding-top: 1rem;
@@ -611,29 +573,22 @@ footer {
 
     .social-nav {
         gap: 25px;
-        /* Ícones mais separados para facilitar o toque */
     }
 
     .social-nav a {
         font-size: 1.5rem;
-        /* Ícones maiores para o dedo */
     }
 
-    /* --- HERO --- */
     .hero {
-        /* Altura mínima para não cortar conteúdo em telas pequenas */
         height: auto;
         min-height: 100vh;
         padding-top: 120px;
-        /* Espaço para o header fixo */
         text-align: center;
-        /* Centraliza tudo no mobile */
         justify-content: flex-start;
     }
 
     .hero h1 {
         font-size: 2.5rem;
-        /* Título menor */
         line-height: 1.1;
     }
 
@@ -641,13 +596,10 @@ footer {
         font-size: 1.1rem;
         margin-top: 10px;
         min-height: 3em;
-        /* Reserva espaço para quebra de linha */
     }
 
-    /* --- SKILLS --- */
     .skills-grid {
         justify-content: center;
-        /* Centraliza as tags */
     }
 
     .skill-tag {
@@ -655,41 +607,32 @@ footer {
         padding: 6px 12px;
     }
 
-    /* --- PROJETOS (GRID) --- */
     .section-title {
         font-size: 1.8rem;
         justify-content: center;
-        /* Título centralizado */
     }
 
     .repos-grid {
-        /* Uma coluna por vez no celular */
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
 
     .repo-card {
         padding: 1.2rem;
-        /* Card mais compacto */
     }
 
-    /* Paginação */
     .pagination-controls {
         flex-direction: row;
-        /* Mantém lado a lado, mas menor */
         gap: 10px;
         font-size: 0.8rem;
     }
 
     .btn-tech {
         padding: 8px 12px;
-        /* Botões mais fáceis de tocar */
     }
 
-    /* --- CONTATO --- */
     .contact-container {
         padding: 1.5rem;
-        /* Menos borda interna */
         width: 100%;
     }
 
@@ -699,7 +642,6 @@ footer {
     }
 }
 
-/* --- AJUSTE PARA TELAS MUITO PEQUENAS (iPhone SE, Galaxy Fold) --- */
 @media (max-width: 380px) {
     .hero h1 {
         font-size: 2rem;

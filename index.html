@@ -7,6 +7,16 @@
     <title>Portfolio | Nelson Ántonio Filho</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="main.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <script type="text/javascript">
+        (function () {
+            // ATENÇÃO: Aqui vai a PUBLIC KEY (Geralmente começa com "user_" ou são letras aleatórias)
+            // Você pega ela em: Account > Public Key no site do EmailJS.
+            // O "service_..." você usa lá no arquivo script.js
+            emailjs.init("a2pCMkQ3naYxEt1If");
+        })();
+    </script>
 </head>
 
 <body>
@@ -40,7 +50,6 @@
         <h2 class="section-title">Repositórios</h2>
 
         <div class="repos-grid" id="repos-container">
-            <p style="color: var(--text-secondary)">Carregando dados via API...</p>
         </div>
 
         <div class="pagination-controls">
@@ -54,15 +63,11 @@
         </div>
     </section>
 
-    <section class="projects-section">
-
-    </section>
-
     <section class="contact-section">
         <h2 class="section-title">Iniciar Transmissão</h2>
 
         <div class="contact-container">
-            <form id="contact-form" action="https://formspree.io/f/xovbaldj" method="POST">
+            <form id="contact-form">
 
                 <div class="input-group">
                     <input type="text" name="name" required placeholder=" ">
