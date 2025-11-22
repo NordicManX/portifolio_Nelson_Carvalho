@@ -115,35 +115,64 @@ header {
     }
 }
 
-/* --- SKILLS SECTION --- */
+/* --- SKILLS COM ÍCONES (LADO A LADO) --- */
 .skills-section {
     padding: 2rem 10%;
     margin-bottom: 2rem;
+    text-align: center;
 }
 
 .skills-grid {
     display: flex;
+    /* Ativa o modo flexível */
+    flex-direction: row;
+    /* Força a direção LINHA (lado a lado) */
     flex-wrap: wrap;
+    /* Permite quebrar linha se não couber na tela */
+    justify-content: center;
+    /* Centraliza o bloco de skills */
     gap: 15px;
+    /* Espaço entre elas */
     margin-top: 20px;
 }
 
 .skill-tag {
-    padding: 8px 16px;
+    width: auto;
+    /* OBRIGATÓRIO: Largura automática baseada no texto */
+    display: inline-flex;
+    /* Comporta-se como um bloco de texto lado a lado */
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    padding: 10px 20px;
     border: 1px solid var(--neon-blue);
-    color: var(--neon-blue);
+    color: var(--text-main);
     font-family: var(--font-mono);
     font-size: 0.9rem;
     border-radius: 4px;
-    background: rgba(0, 243, 255, 0.05);
+    /* Se quiser redondo, mude para 50px */
+    background: rgba(0, 243, 255, 0.02);
     transition: 0.3s;
     cursor: default;
 }
 
+.skill-tag i {
+    font-size: 1.2rem;
+    color: var(--neon-blue);
+    transition: 0.3s;
+}
+
+/* Efeito Hover */
 .skill-tag:hover {
     background: var(--neon-blue);
-    color: #000;
+    color: #0a0a0a;
     box-shadow: var(--neon-glow);
+    transform: translateY(-3px);
+}
+
+.skill-tag:hover i {
+    color: #0a0a0a;
 }
 
 /* --- REPOSITÓRIOS (DESIGN HUD) --- */

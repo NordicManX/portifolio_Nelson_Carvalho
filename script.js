@@ -347,3 +347,38 @@ if (contactForm) {
         }
     });
 }
+
+/* --- 6. RENDERIZAÇÃO DAS SKILLS COM ÍCONES --- */
+const skillsContainer = document.getElementById('skills-container');
+
+const techStack = [
+    { name: "Golang", icon: "fab fa-golang" },
+    { name: "Python", icon: "fab fa-python" },
+    { name: "JavaScript", icon: "fab fa-js" },
+    { name: "Node.js", icon: "fab fa-node-js" },
+    { name: "React", icon: "fab fa-react" },
+    { name: "Vue.js", icon: "fab fa-vuejs" },
+    { name: "HTML5", icon: "fab fa-html5" },
+    { name: "CSS3", icon: "fab fa-css3-alt" },
+    { name: "Docker", icon: "fab fa-docker" },
+    { name: "Git", icon: "fab fa-git-alt" },
+    { name: "SQL", icon: "fas fa-database" },
+    { name: "NoSQL", icon: "fas fa-layer-group" },
+    { name: "Linux", icon: "fab fa-linux" }
+];
+
+if (skillsContainer) {
+    skillsContainer.innerHTML = ''; // Garante que está vazio
+
+    techStack.forEach(skill => {
+        const tag = document.createElement('div');
+        tag.className = 'skill-tag';
+
+        tag.innerHTML = `
+            <i class="${skill.icon}"></i>
+            ${skill.name}
+        `;
+
+        skillsContainer.appendChild(tag);
+    });
+}
