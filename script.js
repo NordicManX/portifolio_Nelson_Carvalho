@@ -91,26 +91,56 @@ window.addEventListener('click', (e) => {
     if (e.target === sideMenu) closeMenu();
 });
 
-/* --- LÓGICA DE LOGIN (SIMULAÇÃO) --- */
+/* --- LÓGICA DE LOGIN (REAL COM NODE.JS) --- */
 const loginForm = document.getElementById('login-form');
+
 if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
         const user = document.getElementById('username').value;
         const pass = document.getElementById('password').value;
         const msg = document.getElementById('login-msg');
 
         msg.innerHTML = 'Conectando ao servidor seguro <i class="fas fa-spinner fa-spin"></i>';
 
-        setTimeout(() => {
-            if (user === 'admin' && pass === '1234') {
-                msg.innerHTML = 'Acesso Autorizado.';
+        try {
+            // URL do seu backend (Localmente é localhost:3000)
+            // Quando subir pra Vercel, vamos mudar isso.
+            const API_URL = 'http://localhost:3000/api/login';
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: user, pass: pass })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                msg.innerHTML = 'Acesso Autorizado. Redirecionando...';
                 msg.style.color = '#00ff88';
+
+                // Salva que o usuário está logado
+                localStorage.setItem('nordic_token', data.token);
+
+                // Redireciona para a página interna (que vamos criar)
+                setTimeout(() => {
+                    // Por enquanto, apenas fecha e avisa
+                    alert("Bem-vindo ao Sistema Privado!");
+                    document.getElementById('login-modal').classList.remove('active');
+                }, 1000);
+
             } else {
-                msg.innerHTML = 'Acesso Negado.';
+                msg.innerHTML = data.message || 'Acesso Negado.';
                 msg.style.color = '#ff0055';
             }
-        }, 1500);
+
+        } catch (error) {
+            console.error(error);
+            msg.innerHTML = 'Erro de conexão com o servidor.';
+            msg.style.color = '#ff0055';
+        }
     });
 }
 

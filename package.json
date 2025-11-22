@@ -1,0 +1,27 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "description": "![Project Status](https://img.shields.io/badge/status-active-success?style=for-the-badge&logo=github)\r ![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NordicManX/portifolio_Nelson_Carvalho.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NordicManX/portifolio_Nelson_Carvalho/issues"
+  },
+  "homepage": "https://github.com/NordicManX/portifolio_Nelson_Carvalho#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "googleapis": "^118.0.0",
+    "mongoose": "^7.0.3"
+  }
+}
