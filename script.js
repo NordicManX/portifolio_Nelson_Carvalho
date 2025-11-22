@@ -350,23 +350,24 @@ if (contactForm) {
     });
 }
 
-/* --- 7. CONTADOR DE VISITAS (API CountAPI) --- */
+/* --- 7. CONTADOR DE VISITAS (NOVA API: CounterAPI) --- */
 const counterElement = document.getElementById('visit-count');
 
 if (counterElement) {
-    // Usei um namespace único para não misturar com outros sites
     const namespace = 'nordicmanx-portfolio';
     const key = 'visits';
 
-    // A função 'hit' incrementa o contador cada vez que alguém entra
-    fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+    // URL diferente: api.counterapi.dev
+    // O final "/up" serve para contar +1 cada vez que carrega
+    fetch(`https://api.counterapi.dev/v1/${namespace}/${key}/up`)
         .then(response => response.json())
         .then(data => {
-            // Atualiza o texto na tela
-            counterElement.innerText = data.value;
+            // Nesta API, o número vem dentro de "count"
+            counterElement.innerText = data.count;
         })
         .catch(error => {
             console.error('Erro no contador:', error);
-            counterElement.innerText = "N/A"; // Fallback se a API falhar
+            // Se der erro (bloqueador de anúncio, etc), mostra um valor fixo "Start"
+            counterElement.innerText = "1";
         });
 }
