@@ -2,9 +2,9 @@
 const githubUsername = 'NordicManX';
 
 // Variáveis de Controle da Paginação
-let allRepos = [];       // Guarda todos os repositórios baixados
-let currentPage = 1;     // Página atual
-const itemsPerPage = 8;  // Mantido em 8 para simetria
+let allRepos = [];
+let currentPage = 1;
+const itemsPerPage = 8;
 
 /* --- 2. EFEITO DIGITAÇÃO (TYPEWRITER) --- */
 const texts = ["Soluções Backend", "APIs Robustas", "Sistemas Web", "Automação", "Nordic Tech"];
@@ -109,7 +109,7 @@ function updatePaginationControls() {
 }
 getRepos();
 
-/* --- 4. FUNDO: RESPONSIVO, REPULSÃO & RETORNO LENTO --- */
+/* --- 4. FUNDO: RESPONSIVO, REPULSÃO & MODO AUTOMÁTICO MOBILE --- */
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 
@@ -117,6 +117,11 @@ if (canvas) {
     let w, h;
     let particles = [];
     let timeCycle = 0;
+
+    // Variáveis novas para o modo automático
+    let isMobile = false;
+    let isTouching = false;
+
     let mouse = { x: -1000, y: -1000, baseRadius: 400 };
 
     // --- EVENTOS DE MOUSE (PC) ---
@@ -126,16 +131,14 @@ if (canvas) {
     });
 
     // --- EVENTOS DE TOQUE (MOBILE) ---
-
-    // 1. Quando o dedo TOCA na tela (TouchStart)
     window.addEventListener('touchstart', (e) => {
+        isTouching = true; // Marca que o usuário está tocando
         if (e.touches.length > 0) {
             mouse.x = e.touches[0].clientX;
             mouse.y = e.touches[0].clientY;
         }
     }, { passive: true });
 
-    // 2. Quando o dedo ARRASTA na tela (TouchMove)
     window.addEventListener('touchmove', (e) => {
         if (e.touches.length > 0) {
             mouse.x = e.touches[0].clientX;
@@ -143,11 +146,11 @@ if (canvas) {
         }
     }, { passive: true });
 
-    // 3. Quando o dedo SAI da tela (TouchEnd)
     window.addEventListener('touchend', () => {
-        mouse.x = -1000;
-        mouse.y = -1000;
+        isTouching = false; // Usuário soltou a tela
+        // Não resetamos mouse.x para permitir transição suave
     });
+
     class Particle {
         constructor(x, y) {
             this.x = x; this.y = y;
@@ -222,7 +225,10 @@ if (canvas) {
         w = canvas.width = window.innerWidth;
         h = canvas.height = window.innerHeight;
         particles = [];
-        let isMobile = w < 768;
+
+        // Verifica se é mobile
+        isMobile = w < 768;
+
         const spacing = isMobile ? 50 : 35;
         mouse.baseRadius = isMobile ? 150 : 400;
 
@@ -236,6 +242,14 @@ if (canvas) {
     function animate() {
         ctx.clearRect(0, 0, w, h);
         timeCycle += 1.5;
+
+        // --- LÓGICA AUTOMÁTICA PARA MOBILE ---
+        // Se for celular E ninguém estiver tocando, a luz se mexe sozinha
+        if (isMobile && !isTouching) {
+            mouse.x = (w / 2) + Math.sin(timeCycle * 0.01) * (w / 3);
+            mouse.y = (h / 2) + Math.cos(timeCycle * 0.015) * (h / 4);
+        }
+
         particles.forEach(p => {
             p.update();
             p.draw();
@@ -253,25 +267,22 @@ const contactForm = document.getElementById("contact-form");
 
 if (contactForm) {
     contactForm.addEventListener("submit", function (event) {
-        event.preventDefault(); // Impede recarregar a página
+        event.preventDefault();
 
-        // --- CONFIGURAÇÃO (PREENCHA AQUI) ---
-        const serviceID = "service_kjolmgl";   // <--- COLOQUE SEU SERVICE ID AQUI
-        const templateID = "template_gt38aha"; // <--- COLOQUE SEU TEMPLATE ID AQUI
-        // ------------------------------------
+        // --- CONFIGURAÇÃO ---
+        const serviceID = "service_kjolmgl";
+        const templateID = "template_gt38aha";
+        // --------------------
 
         const statusMsg = document.getElementById("form-status");
         const submitBtn = contactForm.querySelector('.btn-submit');
         const originalBtnText = submitBtn.innerHTML;
 
-        // Muda botão para "Enviando..."
         submitBtn.innerHTML = 'Enviando... <i class="fas fa-spinner fa-spin"></i>';
         submitBtn.disabled = true;
 
-        // Envia o formulário usando a biblioteca do EmailJS
         emailjs.sendForm(serviceID, templateID, this)
             .then(() => {
-                // SUCESSO: Mostra a tela Tech
                 contactForm.innerHTML = `
                     <div class="success-message">
                         <i class="fas fa-check-circle"></i>
@@ -281,7 +292,6 @@ if (contactForm) {
                     </div>
                 `;
             }, (err) => {
-                // ERRO
                 submitBtn.innerHTML = originalBtnText;
                 submitBtn.disabled = false;
                 statusMsg.innerHTML = "Falha no envio. Verifique as chaves do EmailJS.";
