@@ -145,7 +145,7 @@ if (loginForm) {
 }
 
 /* --- 4. EFEITO DIGITAÇÃO --- */
-const texts = ["Soluções Backend", "APIs Robustas", "Sistemas Web", "Automação", "Nordic Tech"];
+const texts = ["Soluções Backend", "APIs Robustas", "Sistemas Web", "Automação", "Sistemas"];
 let count = 0;
 let index = 0;
 let currentText = "";
