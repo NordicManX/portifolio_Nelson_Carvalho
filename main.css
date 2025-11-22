@@ -659,3 +659,28 @@ footer {
         gap: 15px;
     }
 }
+
+/* --- CONTADOR DE VISITAS (RODAPÉ) --- */
+.system-status {
+    margin-top: 15px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    opacity: 0.8;
+}
+
+.system-status i {
+    color: var(--neon-blue);
+    margin-right: 5px;
+}
+
+.system-status span#visit-count {
+    color: var(--neon-blue);
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+}
+
+.separator {
+    margin: 0 10px;
+    color: #333;
+}

@@ -349,3 +349,24 @@ if (contactForm) {
             });
     });
 }
+
+/* --- 7. CONTADOR DE VISITAS (API CountAPI) --- */
+const counterElement = document.getElementById('visit-count');
+
+if (counterElement) {
+    // Usei um namespace único para não misturar com outros sites
+    const namespace = 'nordicmanx-portfolio';
+    const key = 'visits';
+
+    // A função 'hit' incrementa o contador cada vez que alguém entra
+    fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+        .then(response => response.json())
+        .then(data => {
+            // Atualiza o texto na tela
+            counterElement.innerText = data.value;
+        })
+        .catch(error => {
+            console.error('Erro no contador:', error);
+            counterElement.innerText = "N/A"; // Fallback se a API falhar
+        });
+}
