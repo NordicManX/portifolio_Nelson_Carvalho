@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const User = require('./models/User');
+const User = require('../models/User'); // Garante que acha a pasta models
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,14 +11,13 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// ⚠️ A CORREÇÃO ESTÁ AQUI:
-// Diz ao servidor para servir os ficheiros da pasta atual (index.html, style.css, etc)
-app.use(express.static('.'));
-
 // --- CONEXÃO COM MONGODB ---
 const connectDB = async () => {
     try {
-        if (mongoose.connection.readyState === 1) return;
+        // Verifica se já está conectado para não abrir múltiplas conexões (Serverless)
+        if (mongoose.connection.readyState === 1) {
+            return;
+        }
 
         await mongoose.connect(process.env.MONGODB_URI, {
             useNewUrlParser: true,
@@ -26,71 +25,69 @@ const connectDB = async () => {
         });
         console.log('🔥 MongoDB Conectado!');
 
-        // --- SEED: CRIAÇÃO AUTOMÁTICA DO ADMIN ---
+        // --- SEED ADMIN (Cria usuário se não existir) ---
         const adminExists = await User.findOne({ username: process.env.ADMIN_USER });
         if (!adminExists && process.env.ADMIN_USER && process.env.ADMIN_PASS) {
             await User.create({
                 username: process.env.ADMIN_USER,
                 password: process.env.ADMIN_PASS
             });
-            console.log(`👤 Usuário Admin (${process.env.ADMIN_USER}) criado automaticamente.`);
+            console.log(`👤 Admin criado: ${process.env.ADMIN_USER}`);
         }
 
     } catch (error) {
-        console.error('Erro ao conectar MongoDB:', error);
+        console.error('Erro Crítico MongoDB:', error);
     }
 };
 
+// Inicia a conexão
 connectDB();
 
-// --- ROTAS DA API ---
+// --- ROTAS ---
 
-// 1. Status
+// Rota de Teste
 app.get('/api/status', (req, res) => {
     res.json({
         status: 'Online',
+        environment: process.env.NODE_ENV || 'dev',
         db: mongoose.connection.readyState === 1 ? 'Conectado' : 'Desconectado'
     });
 });
 
-// 2. Login Real
+// Rota de Login
 app.post('/api/login', async (req, res) => {
     const { user, pass } = req.body;
 
-    console.log(`🔒 Tentativa de login para: "${user}"`);
+    // Garante conexão antes de tentar buscar (para casos de serverless frio)
+    await connectDB();
 
     try {
         const foundUser = await User.findOne({ username: user });
 
         if (foundUser && foundUser.password === pass) {
-            console.log(`✅ SUCESSO: Usuário "${user}" logado.`);
             res.json({
                 success: true,
-                token: "TOKEN_" + Math.random().toString(36).substr(2),
+                token: "TOKEN_SECURE_" + Date.now(),
                 message: "Acesso Autorizado."
             });
         } else {
-            console.log(`❌ FALHA: Senha incorreta para "${user}"`);
             res.status(401).json({
                 success: false,
-                message: "Acesso Negado. Credenciais Invalidas"
+                message: "Acesso Negado. Credenciais inválidas."
             });
         }
     } catch (error) {
-        console.error(`⚠️ ERRO: ${error.message}`);
-        res.status(500).json({ success: false, message: "Erro interno." });
+        console.error(error);
+        res.status(500).json({ success: false, message: "Erro interno no servidor." });
     }
 });
 
-// 3. Drive (Futuro)
-app.get('/api/drive/files', (req, res) => {
-    res.json({ message: "Drive API em breve." });
-});
-
-// --- INICIALIZAÇÃO ---
-if (process.env.NODE_ENV !== 'production') {
+// --- INICIALIZAÇÃO HÍBRIDA ---
+// Se estiver rodando direto pelo Node (PC), abre a porta.
+// Se estiver na Vercel, apenas exporta o app.
+if (require.main === module) {
     app.listen(PORT, () => {
-        console.log(`🚀 Servidor rodando localmente na porta http://localhost:${PORT}`);
+        console.log(`🚀 Servidor rodando localmente: http://localhost:${PORT}`);
     });
 }
 
