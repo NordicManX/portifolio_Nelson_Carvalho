@@ -1,7 +1,7 @@
 /* --- 1. CONFIGURAÇÃO GERAL --- */
 const githubUsername = 'NordicManX';
 
-/* --- DETECTOR DE AMBIENTE --- */
+/* --- DETECTOR DE AMBIENTE (CORREÇÃO DE CONEXÃO) --- */
 const BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:3000'
     : '';
@@ -52,16 +52,14 @@ if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
 
 // --- AÇÕES DO MENU ---
 
-// LOGIN: Abre o modal e limpa mensagens anteriores
+// LOGIN: Abre o modal e limpa
 if (menuLoginBtn) {
     menuLoginBtn.addEventListener('click', (e) => {
         e.preventDefault();
         closeMenu();
-        // Limpa campos e mensagens ao abrir
         document.getElementById('login-form').reset();
         const msg = document.getElementById('login-msg');
         if (msg) { msg.innerHTML = ''; msg.className = 'status-msg'; }
-
         loginModal.classList.add('active');
     });
 }
@@ -74,21 +72,13 @@ if (menuConfigBtn) {
     });
 }
 
-// LOGOUT: A CORREÇÃO ESTÁ AQUI
+// LOGOUT (Recarrega a página para limpar sessão)
 if (menuLogoutBtn) {
     menuLogoutBtn.addEventListener('click', (e) => {
         e.preventDefault();
-
-        // 1. Remove o token
         localStorage.removeItem('nordic_token');
-
-        // 2. Avisa o usuário
         alert("Sessão encerrada com segurança.");
-
-        // 3. Fecha o menu
         closeMenu();
-
-        // 4. RECARREGA A PÁGINA para limpar tudo da memória (Crucial!)
         window.location.href = 'index.html';
     });
 }
@@ -125,12 +115,15 @@ if (loginForm) {
                 msg.innerHTML = 'Acesso Autorizado! Redirecionando...';
                 msg.style.color = '#00ff88';
 
+                // Salva o token de segurança
                 localStorage.setItem('nordic_token', data.token);
 
+                // --- AQUI ESTÁ A MUDANÇA CRUCIAL ---
                 setTimeout(() => {
-                    // Redireciona para o Dashboard
+                    // Redireciona o usuário para o painel administrativo
                     window.location.href = 'dashboard.html';
-                }, 1500);
+                }, 1500); // Espera 1.5s para ler a mensagem de sucesso
+
             } else {
                 msg.innerHTML = data.message || 'Acesso Negado.';
                 msg.style.color = '#ff0055';
