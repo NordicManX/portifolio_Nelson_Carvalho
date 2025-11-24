@@ -1,9 +1,7 @@
 /* --- 1. CONFIGURAÇÃO GERAL --- */
 const githubUsername = 'NordicManX';
 
-/* --- DETECTOR DE AMBIENTE (PARA CORRIGIR O ERRO DE CONEXÃO) --- */
-// Se estiver rodando no seu PC (localhost ou 127.0.0.1), usa a porta 3000.
-// Se estiver na Vercel, usa caminho relativo vazio.
+/* --- DETECTOR DE AMBIENTE --- */
 const BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:3000'
     : '';
@@ -52,10 +50,18 @@ function closeMenu() { sideMenu.classList.remove('active'); }
 if (hamburgerBtn) hamburgerBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
 if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
 
+// --- AÇÕES DO MENU ---
+
+// LOGIN: Abre o modal e limpa mensagens anteriores
 if (menuLoginBtn) {
     menuLoginBtn.addEventListener('click', (e) => {
         e.preventDefault();
         closeMenu();
+        // Limpa campos e mensagens ao abrir
+        document.getElementById('login-form').reset();
+        const msg = document.getElementById('login-msg');
+        if (msg) { msg.innerHTML = ''; msg.className = 'status-msg'; }
+
         loginModal.classList.add('active');
     });
 }
@@ -68,12 +74,22 @@ if (menuConfigBtn) {
     });
 }
 
+// LOGOUT: A CORREÇÃO ESTÁ AQUI
 if (menuLogoutBtn) {
     menuLogoutBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        alert("Sessão encerrada.");
-        localStorage.removeItem('nordic_token'); // Limpa o token ao sair
+
+        // 1. Remove o token
+        localStorage.removeItem('nordic_token');
+
+        // 2. Avisa o usuário
+        alert("Sessão encerrada com segurança.");
+
+        // 3. Fecha o menu
         closeMenu();
+
+        // 4. RECARREGA A PÁGINA para limpar tudo da memória (Crucial!)
+        window.location.href = 'index.html';
     });
 }
 
@@ -94,10 +110,9 @@ if (loginForm) {
         const msg = document.getElementById('login-msg');
 
         msg.innerHTML = 'Conectando ao servidor... <i class="fas fa-spinner fa-spin"></i>';
-        msg.className = "status-msg"; // Reset de cor
+        msg.className = "status-msg";
 
         try {
-            // Usa a URL inteligente que definimos no topo
             const response = await fetch(`${BASE_URL}/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -110,12 +125,11 @@ if (loginForm) {
                 msg.innerHTML = 'Acesso Autorizado! Redirecionando...';
                 msg.style.color = '#00ff88';
 
-                // Salva o token para usar depois
                 localStorage.setItem('nordic_token', data.token);
 
                 setTimeout(() => {
-                    loginModal.classList.remove('active');
-                    alert(`Bem-vindo, ${user}! Conexão com MongoDB estabelecida.`);
+                    // Redireciona para o Dashboard
+                    window.location.href = 'dashboard.html';
                 }, 1500);
             } else {
                 msg.innerHTML = data.message || 'Acesso Negado.';
@@ -123,8 +137,7 @@ if (loginForm) {
             }
         } catch (error) {
             console.error("Erro de Login:", error);
-            // Se der erro de conexão, avisa o usuário para verificar o servidor
-            msg.innerHTML = 'Erro de conexão. O servidor (node server.js) está rodando?';
+            msg.innerHTML = 'Erro de conexão. O servidor está online?';
             msg.style.color = '#ff0055';
         }
     });
@@ -220,8 +233,10 @@ if (canvas) {
     class Particle {
         constructor(x, y) {
             this.x = x; this.y = y; this.originX = x; this.originY = y;
-            this.baseSize = 1.5; this.driftSpeedX = Math.random() * 0.02 + 0.01;
-            this.driftSpeedY = Math.random() * 0.02 + 0.01; this.driftRange = Math.random() * 5 + 3;
+            this.baseSize = 1.5;
+            this.driftSpeedX = Math.random() * 0.02 + 0.01;
+            this.driftSpeedY = Math.random() * 0.02 + 0.01;
+            this.driftRange = Math.random() * 5 + 3;
         }
         draw() {
             let mx = mouse.x || w / 2; let my = mouse.y || h / 2;
