@@ -5,7 +5,6 @@ const BASE_URL = (window.location.hostname === 'localhost' || window.location.ho
 
 // 1. VERIFICAÇÃO DE SEGURANÇA
 const token = localStorage.getItem('nordic_token');
-// Recupera dados
 let currentUser = localStorage.getItem('nordic_user') || 'Visitante';
 let currentRole = localStorage.getItem('nordic_role') || 'user';
 let currentAvatar = localStorage.getItem('nordic_avatar') || '';
@@ -35,16 +34,16 @@ function updateHeaderUI() {
 }
 updateHeaderUI();
 
-// 3. CONTROLE DE PRIVILÉGIOS (APENAS GESTÃO DE USUÁRIOS É RESTRITA)
+// 3. CONTROLE DE PRIVILÉGIOS (CORRIGIDO)
 const adminUsersPanel = document.getElementById('admin-users-panel');
+// Nota: O 'admin-upload-panel' NÃO é mais escondido aqui. Todos podem ver.
 
-// O painel de Upload NÃO é mais escondido. Todos podem usar.
-// Apenas o painel de "Gestão de Acessos" fica restrito ao admin.
 if (currentRole === 'admin') {
-    // Carrega usuários se for admin
+    // Se for admin, mostra painel de usuários e carrega a lista
     loadUsers();
     if (adminUsersPanel) adminUsersPanel.style.display = 'block';
 } else {
+    // Se não for admin, esconde APENAS a gestão de usuários
     if (adminUsersPanel) adminUsersPanel.style.display = 'none';
 }
 
@@ -55,7 +54,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
 });
 
 // ============================================================
-// MÓDULO DE ARQUIVOS (AGORA LIBERADO PARA TODOS)
+// MÓDULO DE ARQUIVOS (LIBERADO GERAL)
 // ============================================================
 
 async function loadFiles() {
@@ -81,9 +80,8 @@ async function loadFiles() {
                 ? `href="${file.content}" target="_blank"`
                 : `href="#" onclick="downloadBase64('${file.content}', '${file.name}')"`;
 
-            // BOTÕES DE AÇÃO: Agora visíveis para TODOS os usuários logados
-            // (Se quiser restringir apenas excluir para admin, coloque o if aqui de volta)
-            const actions = `
+            // AÇÕES (CORRIGIDO: Agora aparece para todos)
+            const actionButtons = `
                 <button onclick="openEditFileModal('${file._id}', '${file.name}')" class="btn-action" title="Editar"><i class="fas fa-edit"></i></button>
                 <button onclick="deleteFile('${file._id}')" class="btn-action btn-delete" title="Excluir"><i class="fas fa-trash"></i></button>
             `;
@@ -100,7 +98,7 @@ async function loadFiles() {
                 </div>
                 <div class="df-actions">
                     <a ${actionAttr} class="btn-action" title="Acessar"><i class="fas fa-external-link-alt"></i></a>
-                    ${actions}
+                    ${actionButtons}
                 </div>
             `;
             listContainer.appendChild(item);
