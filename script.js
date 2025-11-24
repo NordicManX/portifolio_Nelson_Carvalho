@@ -90,7 +90,7 @@ window.addEventListener('click', (e) => {
     if (e.target === sideMenu) closeMenu();
 });
 
-/* --- LÓGICA DE LOGIN (CONECTADA AO BACKEND) --- */
+/* --- LÓGICA DE LOGIN (COM TRATAMENTO DE ERRO DE REDE) --- */
 const loginForm = document.getElementById('login-form');
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -99,7 +99,7 @@ if (loginForm) {
         const pass = document.getElementById('password').value;
         const msg = document.getElementById('login-msg');
 
-        msg.innerHTML = 'Conectando ao servidor... <i class="fas fa-spinner fa-spin"></i>';
+        msg.innerHTML = 'Conectando... <i class="fas fa-spinner fa-spin"></i>';
         msg.className = "status-msg";
 
         try {
@@ -109,28 +109,35 @@ if (loginForm) {
                 body: JSON.stringify({ user: user, pass: pass })
             });
 
+            // Verifica se a resposta é JSON válido
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                // Se não for JSON, é erro fatal da Vercel (Tela de erro HTML)
+                throw new Error("O servidor caiu ou não respondeu JSON.");
+            }
+
             const data = await response.json();
 
-            if (data.success) {
+            if (response.ok && data.success) {
                 msg.innerHTML = 'Acesso Autorizado! Redirecionando...';
                 msg.style.color = '#00ff88';
 
-                // Salva o token de segurança
                 localStorage.setItem('nordic_token', data.token);
+                localStorage.setItem('nordic_user', data.username);
+                localStorage.setItem('nordic_role', data.role);
+                if (data.avatar) localStorage.setItem('nordic_avatar', data.avatar);
+                if (data.displayName) localStorage.setItem('nordic_displayName', data.displayName);
 
-                // --- AQUI ESTÁ A MUDANÇA CRUCIAL ---
                 setTimeout(() => {
-                    // Redireciona o usuário para o painel administrativo
                     window.location.href = 'dashboard.html';
-                }, 1500); // Espera 1.5s para ler a mensagem de sucesso
-
+                }, 1500);
             } else {
                 msg.innerHTML = data.message || 'Acesso Negado.';
                 msg.style.color = '#ff0055';
             }
         } catch (error) {
             console.error("Erro de Login:", error);
-            msg.innerHTML = 'Erro de conexão. O servidor está online?';
+            msg.innerHTML = 'Erro no Servidor. Verifique se o MongoDB permitiu o acesso.';
             msg.style.color = '#ff0055';
         }
     });
