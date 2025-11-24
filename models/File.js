@@ -11,7 +11,7 @@ const FileSchema = new mongoose.Schema({
     },
     content: {
         type: String,
-        required: true // Pode ser a String Base64 ou a URL
+        required: true // Aqui fica o Base64 do arquivo ou o Link
     },
     size: {
         type: String,
