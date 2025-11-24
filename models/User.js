@@ -12,7 +12,15 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        default: 'admin'
+        default: 'user'
+    },
+    displayName: {
+        type: String,
+        default: 'Usuário'
+    },
+    avatar: {
+        type: String, // Vamos salvar a imagem em Base64 (Texto)
+        default: ''
     },
     createdAt: {
         type: Date,

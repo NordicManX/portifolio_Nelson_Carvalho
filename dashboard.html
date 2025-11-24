@@ -22,7 +22,12 @@
     <header class="dash-header">
         <div class="logo">&lt;Cloud/&gt;</div>
         <div class="user-info">
-            <span id="user-display"><i class="fas fa-user-circle"></i> Carregando...</span>
+            <!-- Botão de Perfil (Clicável para editar foto/nome) -->
+            <div class="profile-trigger" id="profile-btn" title="Editar Perfil">
+                <img id="header-avatar" src="" class="user-avatar-mini" style="display:none">
+                <i id="header-icon" class="fas fa-user-circle"></i>
+                <span id="user-display">Carregando...</span>
+            </div>
             <button id="logout-btn" class="btn-logout">
                 <i class="fas fa-power-off"></i> Sair
             </button>
@@ -31,12 +36,23 @@
 
     <main class="dash-container">
 
-        <!-- Painel de Upload -->
+        <!-- 1. Painel de Gestão de Usuários (SÓ PARA ADMIN) -->
+        <section class="users-panel" id="admin-users-panel" style="display: none;">
+            <div class="panel-header">
+                <h2><i class="fas fa-users-cog"></i> Gestão de Acessos</h2>
+                <button class="btn-tech-small" onclick="openNewUserModal()">+ Novo Usuário</button>
+            </div>
+            <div class="users-grid" id="users-list">
+                <p class="loading-text">Carregando usuários...</p>
+            </div>
+        </section>
+
+        <!-- 2. Painel de Upload -->
         <section class="upload-panel" id="admin-upload-panel">
             <h2><i class="fas fa-cloud-upload-alt"></i> Adicionar Novo Item</h2>
 
             <div class="upload-tabs">
-                <button class="tab-btn active" onclick="switchTab('file')">Arquivo Pequeno (PDF/Img)</button>
+                <button class="tab-btn active" onclick="switchTab('file')">Arquivo (PDF/Img)</button>
                 <button class="tab-btn" onclick="switchTab('link')">Arquivo Pesado (Nuvem)</button>
             </div>
 
@@ -48,19 +64,17 @@
                 </div>
                 <div class="file-drop-area" id="drop-area">
                     <i class="fas fa-file-import"></i>
-                    <p>Arraste ou clique (Máx 4.5MB)</p>
+                    <p>Arraste ou clique para selecionar (Máx 4.5MB)</p>
                     <input type="file" id="file-input" hidden>
                     <span id="file-selected-name"></span>
                 </div>
                 <button type="submit" class="btn-submit">SALVAR NA BASE</button>
             </form>
 
-            <!-- Form Link Externo (COM BOTÕES NOVOS) -->
+            <!-- Form Link Externo -->
             <form id="form-link" class="upload-form">
                 <div class="info-box link-info">
-                    <p>Para arquivos grandes (GBs), suba na nuvem e cole o link.</p>
-
-                    <!-- BOTÕES PADRÃO E BONITOS -->
+                    <p>Para arquivos grandes (GBs), use a nuvem:</p>
                     <div class="cloud-shortcuts">
                         <a href="https://drive.google.com" target="_blank" class="cloud-btn google">
                             <i class="fab fa-google-drive"></i> Drive
@@ -86,9 +100,16 @@
             </form>
         </section>
 
-        <!-- Lista de Arquivos -->
+        <!-- 3. Lista de Arquivos -->
         <section class="files-panel">
-            <h2><i class="fas fa-database"></i> Base de Conhecimento</h2>
+            <h2><i class="fas fa-database"></i> Uploads/Downloads</h2>
+
+            <!-- Barra de Pesquisa -->
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Filtrar arquivos...">
+            </div>
+
             <div class="files-grid" id="files-list">
                 <p class="loading-text">Carregando dados...</p>
             </div>
@@ -96,12 +117,77 @@
 
     </main>
 
-    <!-- Modal de Edição -->
+    <!-- MODAL 1: EDITAR PERFIL (Disponível para todos) -->
+    <div id="profile-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Meu Perfil</h3>
+                <button class="close-modal-btn" onclick="closeModal('profile-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-preview">
+                    <img id="preview-avatar" src="https://via.placeholder.com/100/000000/FFFFFF/?text=User"
+                        class="avatar-big">
+                    <button class="btn-tech-small" onclick="document.getElementById('avatar-input').click()">Alterar
+                        Foto</button>
+                    <input type="file" id="avatar-input" hidden accept="image/*">
+                </div>
+                <div class="input-group">
+                    <input type="text" id="profile-name" required placeholder=" ">
+                    <label>Nome de Exibição</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="profile-pass" placeholder=" ">
+                    <label>Nova Senha (Opcional)</label>
+                </div>
+                <button id="save-profile-btn" class="btn-submit">SALVAR ALTERAÇÕES</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: NOVO USUÁRIO (Apenas Admin) -->
+    <div id="new-user-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Novo Acesso</h3>
+                <button class="close-modal-btn" onclick="closeModal('new-user-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-new-user">
+                    <div class="input-group">
+                        <input type="text" id="new-user-login" required placeholder=" ">
+                        <label>Login (Usuário)</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="new-user-name" required placeholder=" ">
+                        <label>Nome Real</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="new-user-pass" required placeholder=" ">
+                        <label>Senha Inicial</label>
+                    </div>
+                    <div class="input-group" style="margin-bottom: 20px;">
+                        <label
+                            style="position:static; display:block; margin-bottom:5px; color:var(--text-secondary)">Nível
+                            de Acesso:</label>
+                        <select id="new-user-role"
+                            style="width:100%; padding:10px; background:#151515; color:#fff; border:1px solid var(--neon-blue); border-radius:4px;">
+                            <option value="user">Usuário Comum</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-submit">CRIAR ACESSO</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: EDITAR ARQUIVO (Apenas Admin) -->
     <div id="edit-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Editar Nome</h3>
-                <button class="close-edit">&times;</button>
+                <button class="close-modal-btn" onclick="closeModal('edit-modal')">&times;</button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="edit-id">
