@@ -1,8 +1,19 @@
-/* Estilos específicos para o Dashboard */
+/* --- ESTILOS DO DASHBOARD (ÁREA RESTRITA) --- */
 
+/* Header Fixo e Diferenciado */
 .dash-header {
-    background: rgba(0, 243, 255, 0.05);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.9);
     border-bottom: 1px solid var(--neon-blue);
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(10px);
 }
 
 .user-info {
@@ -11,6 +22,7 @@
     gap: 20px;
     font-family: var(--font-mono);
     color: var(--neon-blue);
+    font-size: 0.9rem;
 }
 
 .btn-logout {
@@ -21,37 +33,50 @@
     cursor: pointer;
     font-family: var(--font-mono);
     transition: 0.3s;
+    border-radius: 4px;
+    font-size: 0.8rem;
 }
 
 .btn-logout:hover {
     background: var(--neon-red);
     color: #fff;
+    box-shadow: 0 0 10px var(--neon-red);
 }
 
+/* Layout Principal (Grid) */
 .dash-container {
-    padding: 120px 10% 50px;
+    padding: 100px 5% 50px;
+    /* Espaço para o header fixo */
     display: grid;
     grid-template-columns: 350px 1fr;
-    gap: 40px;
+    /* Lateral fixa + Resto fluido */
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
     min-height: 100vh;
 }
 
-/* Painéis */
+/* Painéis (Cards de Fundo) */
 .upload-panel,
 .files-panel {
-    background: rgba(20, 20, 20, 0.8);
+    background: rgba(20, 20, 20, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 2rem;
     backdrop-filter: blur(10px);
+    height: fit-content;
+    /* Altura ajusta ao conteúdo */
 }
 
+/* Títulos dos Painéis */
 h2 {
     color: var(--text-main);
     font-size: 1.2rem;
     margin-bottom: 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 10px;
+    display: flex;
+    align-items: center;
 }
 
 h2 i {
@@ -59,7 +84,7 @@ h2 i {
     margin-right: 10px;
 }
 
-/* Abas de Upload */
+/* --- ABAS DE UPLOAD --- */
 .upload-tabs {
     display: flex;
     gap: 10px;
@@ -76,24 +101,32 @@ h2 i {
     font-family: var(--font-mono);
     font-size: 0.8rem;
     transition: 0.3s;
+    border-radius: 4px;
+}
+
+.tab-btn:hover {
+    border-color: var(--neon-blue);
+    color: var(--text-main);
 }
 
 .tab-btn.active {
     border-color: var(--neon-blue);
     color: var(--neon-blue);
     background: rgba(0, 243, 255, 0.1);
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.05);
 }
 
-/* Forms */
+/* --- FORMULÁRIOS --- */
 .upload-form {
     display: none;
-    animation: fadeIn 0.3s;
+    animation: fadeIn 0.3s ease;
 }
 
 .upload-form.active {
     display: block;
 }
 
+/* Área de Drop de Arquivo */
 .file-drop-area {
     border: 2px dashed var(--text-secondary);
     padding: 30px;
@@ -102,56 +135,109 @@ h2 i {
     cursor: pointer;
     color: var(--text-secondary);
     transition: 0.3s;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .file-drop-area:hover {
     border-color: var(--neon-blue);
     color: var(--neon-blue);
+    background: rgba(0, 243, 255, 0.05);
 }
 
 .file-drop-area i {
     font-size: 2rem;
     margin-bottom: 10px;
+    display: block;
 }
 
-/* Lista de Arquivos */
-.search-bar {
+/* --- BOTÕES DE NUVEM (LINKS) --- */
+.info-box {
+    margin-bottom: 20px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.cloud-shortcuts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* 3 colunas iguais */
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.cloud-btn {
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 10px 15px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-}
-
-.search-bar:focus-within {
-    border-color: var(--neon-blue);
-}
-
-.search-bar input {
-    background: transparent;
-    border: none;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
     color: #fff;
-    width: 100%;
-    margin-left: 10px;
-    outline: none;
-    font-family: var(--font-mono);
+    font-family: var(--font-main);
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    border: none;
 }
 
+.cloud-btn:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.15);
+    color: #fff;
+}
+
+/* Cores das Marcas */
+.cloud-btn.google {
+    background-color: #1FA463;
+    /* Verde Drive */
+    box-shadow: 0 4px 10px rgba(31, 164, 99, 0.3);
+}
+
+.cloud-btn.mega {
+    background-color: #D9272E;
+    /* Vermelho Mega */
+    box-shadow: 0 4px 10px rgba(217, 39, 46, 0.3);
+}
+
+.cloud-btn.wetransfer {
+    background-color: #409FFF;
+    /* Azul WeTransfer */
+    box-shadow: 0 4px 10px rgba(64, 159, 255, 0.3);
+}
+
+/* --- LISTA DE ARQUIVOS --- */
 .files-grid {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-height: 500px;
+    max-height: 600px;
+    /* Scroll se tiver muitos arquivos */
     overflow-y: auto;
+    padding-right: 5px;
+    /* Espaço para a barra de rolagem */
 }
 
-/* Item de Arquivo */
+/* Scrollbar estilizada */
+.files-grid::-webkit-scrollbar {
+    width: 5px;
+}
+
+.files-grid::-webkit-scrollbar-thumb {
+    background: var(--text-secondary);
+    border-radius: 10px;
+}
+
+.files-grid::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
 .dash-file-item {
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.03);
     padding: 15px;
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -161,42 +247,58 @@ h2 i {
 .dash-file-item:hover {
     border-color: var(--neon-blue);
     background: rgba(0, 243, 255, 0.05);
+    transform: translateX(5px);
 }
 
+/* Ícones dos itens da lista */
 .df-icon {
     font-size: 1.5rem;
     margin-right: 15px;
-    color: var(--text-secondary);
+    width: 30px;
+    text-align: center;
 }
 
-.dash-file-item.type-link .df-icon {
+.type-link .df-icon {
     color: #ff9d00;
 }
 
-/* Laranja p/ links */
-.dash-file-item.type-file .df-icon {
+/* Laranja para Links */
+.type-file .df-icon {
     color: var(--neon-blue);
 }
 
+/* Azul para Arquivos */
+
 .df-info {
     flex: 1;
+    overflow: hidden;
+    /* Impede texto longo de quebrar layout */
 }
 
 .df-name {
     display: block;
     color: var(--text-main);
     font-weight: bold;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Adiciona ... se for muito longo */
 }
 
 .df-meta {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
     font-family: var(--font-mono);
+    margin-top: 3px;
+    display: block;
 }
 
+/* Botões de Ação (Editar, Excluir, Abrir) */
 .df-actions {
     display: flex;
     gap: 10px;
+    margin-left: 10px;
 }
 
 .btn-action {
@@ -206,6 +308,7 @@ h2 i {
     color: var(--text-secondary);
     font-size: 1rem;
     transition: 0.3s;
+    padding: 5px;
 }
 
 .btn-action:hover {
@@ -217,10 +320,37 @@ h2 i {
     color: var(--neon-red);
 }
 
-/* Mobile */
+/* Texto de Carregamento */
+.loading-text {
+    text-align: center;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-style: italic;
+    margin-top: 20px;
+}
+
+/* --- RESPONSIVIDADE (MOBILE) --- */
 @media (max-width: 768px) {
     .dash-container {
         grid-template-columns: 1fr;
-        padding-top: 100px;
+        /* Uma coluna só */
+        padding-top: 80px;
+        /* Menos espaço no topo */
+        gap: 20px;
+    }
+
+    .cloud-shortcuts {
+        grid-template-columns: 1fr;
+        /* Botões de nuvem um embaixo do outro */
+    }
+
+    .df-name {
+        font-size: 0.9rem;
+    }
+
+    .df-actions {
+        flex-direction: column;
+        /* Botões de ação empilhados para economizar largura */
+        gap: 5px;
     }
 }
