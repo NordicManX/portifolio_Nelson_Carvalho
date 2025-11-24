@@ -3,14 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Área Restrita | Cloud Nordic</title>
 
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- CSS Principal e do Painel -->
-    <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="dashboard.css">
 </head>
 
@@ -18,25 +15,22 @@
 
     <canvas id="particles"></canvas>
 
-    <!-- Header -->
     <header class="dash-header">
         <div class="logo">&lt;Cloud/&gt;</div>
         <div class="user-info">
-            <!-- Botão de Perfil (Clicável para editar foto/nome) -->
             <div class="profile-trigger" id="profile-btn" title="Editar Perfil">
                 <img id="header-avatar" src="" class="user-avatar-mini" style="display:none">
                 <i id="header-icon" class="fas fa-user-circle"></i>
                 <span id="user-display">Carregando...</span>
             </div>
             <button id="logout-btn" class="btn-logout">
-                <i class="fas fa-power-off"></i> Sair
+                <i class="fas fa-power-off"></i> <span class="logout-text">Sair</span>
             </button>
         </div>
     </header>
 
     <main class="dash-container">
 
-        <!-- 1. Painel de Gestão de Usuários (SÓ PARA ADMIN) -->
         <section class="users-panel" id="admin-users-panel" style="display: none;">
             <div class="panel-header">
                 <h2><i class="fas fa-users-cog"></i> Gestão de Acessos</h2>
@@ -47,7 +41,6 @@
             </div>
         </section>
 
-        <!-- 2. Painel de Upload -->
         <section class="upload-panel" id="admin-upload-panel">
             <h2><i class="fas fa-cloud-upload-alt"></i> Adicionar Novo Item</h2>
 
@@ -56,7 +49,6 @@
                 <button class="tab-btn" onclick="switchTab('link')">Arquivo Pesado (Nuvem)</button>
             </div>
 
-            <!-- Form Upload Arquivo -->
             <form id="form-file" class="upload-form active">
                 <div class="input-group">
                     <input type="text" id="file-name-input" required placeholder=" ">
@@ -71,7 +63,6 @@
                 <button type="submit" class="btn-submit">SALVAR NA BASE</button>
             </form>
 
-            <!-- Form Link Externo -->
             <form id="form-link" class="upload-form">
                 <div class="info-box link-info">
                     <p>Para arquivos grandes (GBs), use a nuvem:</p>
@@ -100,11 +91,9 @@
             </form>
         </section>
 
-        <!-- 3. Lista de Arquivos -->
         <section class="files-panel">
             <h2><i class="fas fa-database"></i> Uploads/Downloads</h2>
 
-            <!-- Barra de Pesquisa -->
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" id="search-input" placeholder="Filtrar arquivos...">
@@ -117,7 +106,6 @@
 
     </main>
 
-    <!-- MODAL 1: EDITAR PERFIL (Disponível para todos) -->
     <div id="profile-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -145,7 +133,6 @@
         </div>
     </div>
 
-    <!-- MODAL 2: NOVO USUÁRIO (Apenas Admin) -->
     <div id="new-user-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -167,11 +154,10 @@
                         <label>Senha Inicial</label>
                     </div>
                     <div class="input-group" style="margin-bottom: 20px;">
-                        <label
-                            style="position:static; display:block; margin-bottom:5px; color:var(--text-secondary)">Nível
-                            de Acesso:</label>
-                        <select id="new-user-role"
-                            style="width:100%; padding:10px; background:#151515; color:#fff; border:1px solid var(--neon-blue); border-radius:4px;">
+                        <label style="position:static; display:block; margin-bottom:5px; color:var(--text-secondary)">
+                            Nível de Acesso:
+                        </label>
+                        <select id="new-user-role" class="tech-select">
                             <option value="user">Usuário Comum</option>
                             <option value="admin">Administrador</option>
                         </select>
@@ -182,7 +168,6 @@
         </div>
     </div>
 
-    <!-- MODAL 3: EDITAR ARQUIVO (Apenas Admin) -->
     <div id="edit-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">

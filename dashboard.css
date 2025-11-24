@@ -1,6 +1,39 @@
-/* --- ESTILOS DO DASHBOARD (ÁREA RESTRITA) --- */
+/* --- VARIÁVEIS E GLOBAIS (Fallback caso não tenha main.css) --- */
+:root {
+    --neon-blue: #00f3ff;
+    --neon-red: #ff2a2a;
+    --text-main: #e0e0e0;
+    --text-secondary: #94a3b8;
+    --bg-dark: #0a0a0a;
+    --font-mono: 'Courier New', Courier, monospace;
+    --font-main: Arial, sans-serif;
+}
 
-/* HEADER FIXO */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    overflow-x: hidden;
+}
+
+/* CANVAS DE FUNDO */
+#particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* --- HEADER FIXO --- */
 .dash-header {
     position: fixed;
     top: 0;
@@ -16,6 +49,13 @@
     backdrop-filter: blur(10px);
 }
 
+.logo {
+    font-family: var(--font-mono);
+    font-weight: bold;
+    color: var(--neon-blue);
+    font-size: 1.5rem;
+}
+
 .user-info {
     display: flex;
     align-items: center;
@@ -25,7 +65,7 @@
     font-size: 0.9rem;
 }
 
-/* Botão de Perfil no Header */
+/* Botão de Perfil */
 .profile-trigger {
     display: flex;
     align-items: center;
@@ -33,7 +73,6 @@
     cursor: pointer;
     padding: 5px 12px;
     border-radius: 50px;
-    /* Pílula */
     transition: 0.3s;
     border: 1px solid transparent;
 }
@@ -72,28 +111,34 @@
     box-shadow: 0 0 15px var(--neon-red);
 }
 
-/* LAYOUT GRID PRINCIPAL */
+/* --- LAYOUT GRID PRINCIPAL --- */
 .dash-container {
     padding: 100px 5% 50px;
     display: grid;
+    /* Desktop: Coluna de 350px + restante fluido */
     grid-template-columns: 350px 1fr;
-    /* Coluna Fixa + Fluida */
     gap: 30px;
     max-width: 1400px;
     margin: 0 auto;
     min-height: 100vh;
 }
 
-/* --- PAINEL DE GESTÃO DE USUÁRIOS (ADMIN) --- */
-.users-panel {
-    grid-column: 1 / -1;
-    /* Ocupa a largura toda */
-    background: rgba(20, 20, 20, 0.8);
+/* --- PAINÉIS GERAIS --- */
+.users-panel,
+.upload-panel,
+.files-panel {
+    background: rgba(20, 20, 20, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 1.5rem;
-    margin-bottom: 10px;
     backdrop-filter: blur(10px);
+}
+
+.users-panel {
+    grid-column: 1 / -1;
+    /* Ocupa largura total */
+    margin-bottom: 10px;
+    background: rgba(20, 20, 20, 0.8);
 }
 
 .panel-header {
@@ -103,73 +148,6 @@
     margin-bottom: 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 10px;
-}
-
-.users-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 15px;
-}
-
-/* Card de Usuário */
-.user-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 15px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    transition: 0.3s;
-}
-
-.user-card:hover {
-    border-color: var(--neon-blue);
-    background: rgba(0, 243, 255, 0.05);
-}
-
-.user-card img {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--text-secondary);
-}
-
-.user-card-info {
-    flex: 1;
-    overflow: hidden;
-}
-
-.user-card-name {
-    display: block;
-    font-weight: bold;
-    color: var(--text-main);
-    font-size: 0.95rem;
-}
-
-.user-card-role {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    font-family: var(--font-mono);
-    margin-top: 2px;
-}
-
-.user-card-role.admin {
-    color: var(--neon-red);
-    font-weight: bold;
-}
-
-/* --- PAINÉIS DE ARQUIVOS --- */
-.upload-panel,
-.files-panel {
-    background: rgba(20, 20, 20, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 2rem;
-    backdrop-filter: blur(10px);
-    height: fit-content;
 }
 
 h2 {
@@ -187,7 +165,48 @@ h2 i {
     margin-right: 10px;
 }
 
-/* Abas */
+/* --- GESTÃO DE USUÁRIOS --- */
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.user-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: 0.3s;
+}
+
+.user-card:hover {
+    border-color: var(--neon-blue);
+    background: rgba(0, 243, 255, 0.05);
+}
+
+.user-card-name {
+    font-weight: bold;
+    color: var(--text-main);
+    display: block;
+}
+
+.user-card-role {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: block;
+    font-family: var(--font-mono);
+}
+
+.user-card-role.admin {
+    color: var(--neon-red);
+    font-weight: bold;
+}
+
+/* --- UPLOAD E ABAS --- */
 .upload-tabs {
     display: flex;
     gap: 10px;
@@ -202,7 +221,6 @@ h2 i {
     color: var(--text-secondary);
     cursor: pointer;
     font-family: var(--font-mono);
-    font-size: 0.8rem;
     transition: 0.3s;
     border-radius: 4px;
 }
@@ -211,10 +229,8 @@ h2 i {
     border-color: var(--neon-blue);
     color: var(--neon-blue);
     background: rgba(0, 243, 255, 0.1);
-    box-shadow: 0 0 10px rgba(0, 243, 255, 0.05);
 }
 
-/* Forms */
 .upload-form {
     display: none;
     animation: fadeIn 0.3s ease;
@@ -224,6 +240,95 @@ h2 i {
     display: block;
 }
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Inputs e Botões */
+.input-group {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    border-radius: 4px;
+    color: #fff;
+    outline: none;
+    transition: 0.3s;
+}
+
+.input-group label {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    color: var(--text-secondary);
+    pointer-events: none;
+    transition: 0.3s;
+    background: rgba(20, 20, 20, 0.8);
+    padding: 0 5px;
+}
+
+.input-group input:focus,
+.input-group input:not(:placeholder-shown) {
+    border-color: var(--neon-blue);
+}
+
+.input-group input:focus~label,
+.input-group input:not(:placeholder-shown)~label {
+    top: -10px;
+    font-size: 0.8rem;
+    color: var(--neon-blue);
+}
+
+.tech-select {
+    width: 100%;
+    padding: 10px;
+    background: #151515;
+    color: #fff;
+    border: 1px solid var(--neon-blue);
+    border-radius: 4px;
+}
+
+.btn-submit,
+.btn-tech-small {
+    width: 100%;
+    padding: 12px;
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue);
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+}
+
+.btn-tech-small {
+    width: auto;
+    padding: 5px 15px;
+    font-size: 0.8rem;
+}
+
+.btn-submit:hover,
+.btn-tech-small:hover {
+    background: var(--neon-blue);
+    color: #000;
+    box-shadow: 0 0 15px var(--neon-blue);
+}
+
+/* Drop Area */
 .file-drop-area {
     border: 2px dashed var(--text-secondary);
     padding: 30px;
@@ -242,20 +347,7 @@ h2 i {
     background: rgba(0, 243, 255, 0.05);
 }
 
-.file-drop-area i {
-    font-size: 2rem;
-    margin-bottom: 10px;
-    display: block;
-}
-
-/* --- BOTÕES DE NUVEM (LINKS) --- */
-.info-box {
-    margin-bottom: 20px;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    line-height: 1.4;
-}
-
+/* Botões de Nuvem */
 .cloud-shortcuts {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -272,35 +364,28 @@ h2 i {
     border-radius: 6px;
     text-decoration: none;
     color: #fff;
-    font-family: var(--font-main);
-    font-weight: 600;
     font-size: 0.85rem;
-    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
-    border: none;
-}
-
-.cloud-btn:hover {
-    transform: translateY(-3px);
-    filter: brightness(1.15);
-    color: #fff;
+    transition: 0.3s;
 }
 
 .cloud-btn.google {
     background-color: #1FA463;
-    box-shadow: 0 4px 10px rgba(31, 164, 99, 0.3);
 }
 
 .cloud-btn.mega {
     background-color: #D9272E;
-    box-shadow: 0 4px 10px rgba(217, 39, 46, 0.3);
 }
 
 .cloud-btn.wetransfer {
     background-color: #409FFF;
-    box-shadow: 0 4px 10px rgba(64, 159, 255, 0.3);
 }
 
-/* --- BARRA DE PESQUISA --- */
+.cloud-btn:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.2);
+}
+
+/* --- LISTA DE ARQUIVOS --- */
 .search-bar {
     display: flex;
     align-items: center;
@@ -309,12 +394,6 @@ h2 i {
     border-radius: 6px;
     margin-bottom: 20px;
     border: 1px solid transparent;
-    transition: 0.3s;
-}
-
-.search-bar:focus-within {
-    border-color: var(--neon-blue);
-    background: rgba(255, 255, 255, 0.08);
 }
 
 .search-bar input {
@@ -324,10 +403,8 @@ h2 i {
     width: 100%;
     margin-left: 10px;
     outline: none;
-    font-family: var(--font-mono);
 }
 
-/* Lista de Arquivos */
 .files-grid {
     display: flex;
     flex-direction: column;
@@ -335,19 +412,6 @@ h2 i {
     max-height: 600px;
     overflow-y: auto;
     padding-right: 5px;
-}
-
-.files-grid::-webkit-scrollbar {
-    width: 5px;
-}
-
-.files-grid::-webkit-scrollbar-thumb {
-    background: var(--text-secondary);
-    border-radius: 10px;
-}
-
-.files-grid::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
 }
 
 .dash-file-item {
@@ -363,7 +427,6 @@ h2 i {
 .dash-file-item:hover {
     border-color: var(--neon-blue);
     background: rgba(0, 243, 255, 0.05);
-    transform: translateX(5px);
 }
 
 .df-icon {
@@ -388,7 +451,6 @@ h2 i {
 
 .df-name {
     display: block;
-    color: var(--text-main);
     font-weight: bold;
     font-size: 0.95rem;
     white-space: nowrap;
@@ -399,7 +461,6 @@ h2 i {
 .df-meta {
     font-size: 0.75rem;
     color: var(--text-secondary);
-    font-family: var(--font-mono);
     margin-top: 3px;
     display: block;
 }
@@ -429,15 +490,50 @@ h2 i {
     color: var(--neon-red);
 }
 
-.loading-text {
-    text-align: center;
-    color: var(--text-secondary);
-    font-family: var(--font-mono);
-    font-style: italic;
-    margin-top: 20px;
+/* --- MODAIS --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
 }
 
-/* --- MODAL DE PERFIL --- */
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #111;
+    border: 1px solid var(--neon-blue);
+    padding: 2rem;
+    border-radius: 12px;
+    width: 400px;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    color: var(--neon-blue);
+}
+
+.close-modal-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* Avatar no Modal */
 .profile-preview {
     display: flex;
     flex-direction: column;
@@ -452,31 +548,109 @@ h2 i {
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--neon-blue);
-    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
+/* =======================================================
+   RESPONSIVIDADE (TABLET & MOBILE)
+   ======================================================= */
+
+/* Tablet (até 1024px) */
+@media (max-width: 1024px) {
     .dash-container {
         grid-template-columns: 1fr;
-        padding-top: 90px;
+        /* Empilha tudo em 1 coluna */
         gap: 20px;
+        padding-top: 90px;
+    }
+
+    .users-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+}
+
+/* Mobile (até 768px) */
+@media (max-width: 768px) {
+
+    /* Header Adaptável */
+    .dash-header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px 5%;
+        height: auto;
+    }
+
+    .dash-container {
+        padding: 20px 5%;
+        margin-top: 110px;
+        /* Compensa a altura variável do header */
+    }
+
+    .logout-text {
+        display: none;
+    }
+
+    /* Esconde texto "Sair" */
+
+    /* Painéis */
+    .upload-tabs {
+        flex-direction: column;
     }
 
     .cloud-shortcuts {
         grid-template-columns: 1fr;
     }
 
-    .users-grid {
-        grid-template-columns: 1fr;
+    .file-drop-area {
+        padding: 20px;
+    }
+
+    /* Lista de Arquivos em formato de Cartão */
+    .dash-file-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px;
+    }
+
+    .df-icon {
+        margin-bottom: 10px;
+        font-size: 1.8rem;
+    }
+
+    .df-info {
+        width: 100%;
+        margin-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 10px;
     }
 
     .df-name {
-        font-size: 0.9rem;
+        white-space: normal;
+        /* Permite quebra de linha no nome */
+        word-break: break-all;
     }
 
     .df-actions {
-        flex-direction: column;
-        gap: 5px;
+        width: 100%;
+        justify-content: space-between;
+        margin-left: 0;
+    }
+
+    .btn-action {
+        padding: 10px;
+        /* Área de toque maior */
+        font-size: 1.2rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        width: 30%;
+        /* Botões ocupam largura igual */
+        text-align: center;
+    }
+
+    /* Modal Responsivo */
+    .modal-content {
+        width: 90%;
+        margin: 0 auto;
+        max-height: 85vh;
+        overflow-y: auto;
     }
 }

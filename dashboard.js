@@ -34,16 +34,13 @@ function updateHeaderUI() {
 }
 updateHeaderUI();
 
-// 3. CONTROLE DE PRIVILÉGIOS (CORRIGIDO)
+// 3. CONTROLE DE PRIVILÉGIOS
 const adminUsersPanel = document.getElementById('admin-users-panel');
-// Nota: O 'admin-upload-panel' NÃO é mais escondido aqui. Todos podem ver.
 
 if (currentRole === 'admin') {
-    // Se for admin, mostra painel de usuários e carrega a lista
     loadUsers();
     if (adminUsersPanel) adminUsersPanel.style.display = 'block';
 } else {
-    // Se não for admin, esconde APENAS a gestão de usuários
     if (adminUsersPanel) adminUsersPanel.style.display = 'none';
 }
 
@@ -54,7 +51,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
 });
 
 // ============================================================
-// MÓDULO DE ARQUIVOS (LIBERADO GERAL)
+// MÓDULO DE ARQUIVOS
 // ============================================================
 
 async function loadFiles() {
@@ -80,7 +77,6 @@ async function loadFiles() {
                 ? `href="${file.content}" target="_blank"`
                 : `href="#" onclick="downloadBase64('${file.content}', '${file.name}')"`;
 
-            // AÇÕES (CORRIGIDO: Agora aparece para todos)
             const actionButtons = `
                 <button onclick="openEditFileModal('${file._id}', '${file.name}')" class="btn-action" title="Editar"><i class="fas fa-edit"></i></button>
                 <button onclick="deleteFile('${file._id}')" class="btn-action btn-delete" title="Excluir"><i class="fas fa-trash"></i></button>
@@ -201,7 +197,7 @@ window.openEditFileModal = function (id, currentName) {
     editFileModal.classList.add('active');
 }
 
-document.querySelectorAll('.close-modal-btn, .close-edit').forEach(btn => {
+document.querySelectorAll('.close-modal-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         btn.closest('.modal-overlay').classList.remove('active');
     });
@@ -235,7 +231,7 @@ window.switchTab = function (tab) {
 }
 
 // ============================================================
-// MÓDULO DE USUÁRIOS (ADMIN ONLY)
+// MÓDULO DE USUÁRIOS
 // ============================================================
 
 async function loadUsers() {
@@ -352,13 +348,24 @@ async function sendProfileUpdate(payload) {
     document.getElementById('save-profile-btn').disabled = false;
 }
 
-// PARTICLES
+// ============================================================
+// PARTICLES (FUNDO ANIMADO) - ATUALIZADO
+// ============================================================
 const cvs = document.getElementById('particles');
 if (cvs) {
     const ctx = cvs.getContext('2d');
-    let w = cvs.width = window.innerWidth; let h = cvs.height = window.innerHeight;
+    let w = cvs.width = window.innerWidth;
+    let h = cvs.height = window.innerHeight;
+
+    // ATUALIZAÇÃO PARA RESPONSIVIDADE (RESIZE)
+    window.addEventListener('resize', () => {
+        w = cvs.width = window.innerWidth;
+        h = cvs.height = window.innerHeight;
+    });
+
     let parts = [];
     for (let i = 0; i < 40; i++) parts.push({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5 });
+
     function anim() {
         ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#00f3ff';
         parts.forEach(p => {
