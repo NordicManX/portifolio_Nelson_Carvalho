@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área Restrita | Cloud Nordic</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Reutilizamos o CSS principal e adicionamos o específico -->
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+
+    <canvas id="particles"></canvas>
+
+    <!-- Header Simplificado -->
+    <header class="dash-header">
+        <div class="logo">&lt;Cloud/&gt;</div>
+        <div class="user-info">
+            <span><i class="fas fa-user-astronaut"></i> Admin</span>
+            <button id="logout-btn" class="btn-logout"><i class="fas fa-power-off"></i> Sair</button>
+        </div>
+    </header>
+
+    <main class="dash-container">
+
+        <!-- Painel de Upload -->
+        <section class="upload-panel">
+            <h2><i class="fas fa-cloud-upload-alt"></i> Adicionar Novo Item</h2>
+
+            <div class="upload-tabs">
+                <button class="tab-btn active" onclick="switchTab('file')">Arquivo (PDF/Img)</button>
+                <button class="tab-btn" onclick="switchTab('link')">Link Externo (Drive)</button>
+            </div>
+
+            <!-- Form Upload Arquivo -->
+            <form id="form-file" class="upload-form active">
+                <div class="input-group">
+                    <input type="text" id="file-name-input" required placeholder=" ">
+                    <label>Nome para Exibição</label>
+                </div>
+                <div class="file-drop-area" id="drop-area">
+                    <i class="fas fa-file-import"></i>
+                    <p>Arraste ou clique para selecionar</p>
+                    <input type="file" id="file-input" hidden>
+                    <span id="file-selected-name"></span>
+                </div>
+                <button type="submit" class="btn-submit">SALVAR NA NUVEM</button>
+            </form>
+
+            <!-- Form Link Externo -->
+            <form id="form-link" class="upload-form">
+                <div class="input-group">
+                    <input type="text" id="link-name-input" required placeholder=" ">
+                    <label>Nome do Link</label>
+                </div>
+                <div class="input-group">
+                    <input type="url" id="link-url-input" required placeholder=" ">
+                    <label>URL (Google Drive, Mega, etc)</label>
+                </div>
+                <button type="submit" class="btn-submit">SALVAR ATALHO</button>
+            </form>
+        </section>
+
+        <!-- Lista de Arquivos -->
+        <section class="files-panel">
+            <h2><i class="fas fa-database"></i> Base de Conhecimento</h2>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Filtrar arquivos...">
+            </div>
+
+            <div class="files-grid" id="files-list">
+                <!-- O JS vai preencher isso aqui -->
+                <p class="loading-text">Carregando dados...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal de Edição -->
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Nome</h3>
+                <button class="close-edit">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-id">
+                <div class="input-group">
+                    <input type="text" id="edit-name" required>
+                    <label>Novo Nome</label>
+                </div>
+                <button id="save-edit-btn" class="btn-submit">ATUALIZAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reutiliza o efeito de fundo + lógica do dashboard -->
+    <!-- Importante: Copie apenas a lógica de partículas do script.js ou crie um particles.js separado. 
+         Para simplificar, vamos assumir que dashboard.js terá sua própria lógica. -->
+    <script src="dashboard.js"></script>
+</body>
+
+</html>

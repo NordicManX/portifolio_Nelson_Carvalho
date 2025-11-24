@@ -1,0 +1,226 @@
+/* Estilos específicos para o Dashboard */
+
+.dash-header {
+    background: rgba(0, 243, 255, 0.05);
+    border-bottom: 1px solid var(--neon-blue);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-family: var(--font-mono);
+    color: var(--neon-blue);
+}
+
+.btn-logout {
+    background: transparent;
+    border: 1px solid var(--neon-red);
+    color: var(--neon-red);
+    padding: 5px 15px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    transition: 0.3s;
+}
+
+.btn-logout:hover {
+    background: var(--neon-red);
+    color: #fff;
+}
+
+.dash-container {
+    padding: 120px 10% 50px;
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 40px;
+    min-height: 100vh;
+}
+
+/* Painéis */
+.upload-panel,
+.files-panel {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+}
+
+h2 {
+    color: var(--text-main);
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+h2 i {
+    color: var(--neon-blue);
+    margin-right: 10px;
+}
+
+/* Abas de Upload */
+.upload-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    border: 1px solid var(--text-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    transition: 0.3s;
+}
+
+.tab-btn.active {
+    border-color: var(--neon-blue);
+    color: var(--neon-blue);
+    background: rgba(0, 243, 255, 0.1);
+}
+
+/* Forms */
+.upload-form {
+    display: none;
+    animation: fadeIn 0.3s;
+}
+
+.upload-form.active {
+    display: block;
+}
+
+.file-drop-area {
+    border: 2px dashed var(--text-secondary);
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: 0.3s;
+}
+
+.file-drop-area:hover {
+    border-color: var(--neon-blue);
+    color: var(--neon-blue);
+}
+
+.file-drop-area i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+/* Lista de Arquivos */
+.search-bar {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+}
+
+.search-bar:focus-within {
+    border-color: var(--neon-blue);
+}
+
+.search-bar input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    width: 100%;
+    margin-left: 10px;
+    outline: none;
+    font-family: var(--font-mono);
+}
+
+.files-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Item de Arquivo */
+.dash-file-item {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: 0.3s;
+}
+
+.dash-file-item:hover {
+    border-color: var(--neon-blue);
+    background: rgba(0, 243, 255, 0.05);
+}
+
+.df-icon {
+    font-size: 1.5rem;
+    margin-right: 15px;
+    color: var(--text-secondary);
+}
+
+.dash-file-item.type-link .df-icon {
+    color: #ff9d00;
+}
+
+/* Laranja p/ links */
+.dash-file-item.type-file .df-icon {
+    color: var(--neon-blue);
+}
+
+.df-info {
+    flex: 1;
+}
+
+.df-name {
+    display: block;
+    color: var(--text-main);
+    font-weight: bold;
+}
+
+.df-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+}
+
+.df-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    transition: 0.3s;
+}
+
+.btn-action:hover {
+    color: #fff;
+    transform: scale(1.2);
+}
+
+.btn-delete:hover {
+    color: var(--neon-red);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .dash-container {
+        grid-template-columns: 1fr;
+        padding-top: 100px;
+    }
+}
