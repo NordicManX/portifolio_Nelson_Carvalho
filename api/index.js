@@ -1,235 +1,373 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const path = require('path');
+/* --- CONFIGURAÇÃO DE AMBIENTE --- */
+const BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:3000'
+    : '';
 
-// Importação Segura dos Modelos
-// Isso evita que o servidor quebre se o arquivo não existir ainda
-let User, File;
-try {
-    User = require('../models/User');
-    File = require('../models/File');
-} catch (e) {
-    console.log("Aviso: Erro ao carregar modelos:", e);
+// 1. VERIFICAÇÃO DE SEGURANÇA E PERFIL
+const token = localStorage.getItem('nordic_token');
+let currentUser = localStorage.getItem('nordic_user') || 'Visitante';
+let currentRole = localStorage.getItem('nordic_role') || 'user';
+let currentAvatar = localStorage.getItem('nordic_avatar') || '';
+let currentDisplayName = localStorage.getItem('nordic_displayName') || currentUser;
+
+if (!token) {
+    alert("Acesso não autorizado. Faça login.");
+    window.location.href = 'index.html';
 }
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+// 2. ATUALIZA A INTERFACE DO HEADER (Nome e Foto)
+function updateHeaderUI() {
+    const userDisplay = document.getElementById('user-display');
+    const headerAvatar = document.getElementById('header-avatar');
+    const headerIcon = document.getElementById('header-icon');
 
-// --- MIDDLEWARES ---
-app.use(cors());
-// Aumentei o limite para 50mb para aguentar uploads de fotos de perfil
-app.use(express.json({ limit: '50mb' }));
-// Serve arquivos estáticos para rodar localmente
-app.use(express.static(path.join(__dirname, '..')));
+    userDisplay.innerHTML = `${currentDisplayName} ${currentRole === 'admin' ? '<small style="color:var(--neon-red)">(Admin)</small>' : ''}`;
 
-// --- CONEXÃO COM O BANCO DE DADOS (MONGODB) ---
-const connectDB = async () => {
-    // Se já estiver conectado, não reconecta (importante para serverless)
-    if (mongoose.connection.readyState === 1) return;
-
-    if (!process.env.MONGODB_URI) {
-        console.log("⚠️ ERRO CRÍTICO: MONGODB_URI não definida no .env ou na Vercel!");
-        return;
+    if (currentAvatar && currentAvatar.length > 50) {
+        headerAvatar.src = currentAvatar;
+        headerAvatar.style.display = 'inline-block';
+        if (headerIcon) headerIcon.style.display = 'none';
+    } else {
+        headerAvatar.style.display = 'none';
+        if (headerIcon) headerIcon.style.display = 'inline-block';
     }
+}
+updateHeaderUI();
 
-    try {
-        await mongoose.connect(process.env.MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-        console.log('🔥 MongoDB Conectado!');
+// 3. CONTROLE DE PRIVILÉGIOS (APENAS GESTÃO DE USUÁRIOS É RESTRITA)
+const adminUsersPanel = document.getElementById('admin-users-panel');
 
-        // --- SEED ADMIN ---
-        // Cria o usuário Admin automaticamente se o banco estiver vazio
-        if (User) {
-            const adminExists = await User.findOne({ username: process.env.ADMIN_USER });
-            // Só cria se não existir E se as variáveis de ambiente estiverem definidas
-            if (!adminExists && process.env.ADMIN_USER && process.env.ADMIN_PASS) {
-                await User.create({
-                    username: process.env.ADMIN_USER,
-                    password: process.env.ADMIN_PASS,
-                    role: 'admin',
-                    displayName: 'Administrador',
-                    avatar: '' // Avatar vazio por padrão
-                });
-                console.log(`👤 Usuário Admin criado: ${process.env.ADMIN_USER}`);
-            }
-        }
-    } catch (error) {
-        console.error('Erro Conexão Mongo:', error);
-    }
-};
+// AQUI FOI A MUDANÇA: Não escondemos mais o Upload.
+// Apenas o painel de "Gestão de Acessos" fica restrito ao admin.
+if (currentRole === 'admin') {
+    // Carrega usuários se for admin
+    loadUsers();
+    if (adminUsersPanel) adminUsersPanel.style.display = 'block';
+} else {
+    if (adminUsersPanel) adminUsersPanel.style.display = 'none';
+}
 
-// Inicia a conexão ao carregar o arquivo
-connectDB();
-
-// ==========================================================================
-// ROTAS DA API
-// ==========================================================================
-
-// 1. Status do Servidor (Ping)
-app.get('/api/status', (req, res) => {
-    res.json({
-        status: 'Online',
-        db: mongoose.connection.readyState === 1 ? 'Conectado' : 'Desconectado',
-        timestamp: new Date()
-    });
+// 4. LOGOUT
+document.getElementById('logout-btn').addEventListener('click', () => {
+    localStorage.clear();
+    window.location.href = 'index.html';
 });
 
-// 2. Login
-app.post('/api/login', async (req, res) => {
-    const { user, pass } = req.body;
+// ============================================================
+// MÓDULO DE ARQUIVOS (AGORA LIBERADO PARA TODOS)
+// ============================================================
+
+async function loadFiles() {
+    const listContainer = document.getElementById('files-list');
+    if (!listContainer) return;
+    listContainer.innerHTML = '<p class="loading-text">Carregando dados...</p>';
+
     try {
-        await connectDB(); // Garante conexão
+        const res = await fetch(`${BASE_URL}/api/files`);
+        const files = await res.json();
+        listContainer.innerHTML = '';
 
-        if (!User) return res.status(500).json({ error: "Modelo User não carregado" });
-
-        const foundUser = await User.findOne({ username: user });
-
-        if (foundUser && foundUser.password === pass) {
-            // Retorna dados seguros (sem senha)
-            res.json({
-                success: true,
-                token: "TOKEN_SECURE_" + Date.now(),
-                username: foundUser.username,
-                displayName: foundUser.displayName || foundUser.username,
-                avatar: foundUser.avatar,
-                role: foundUser.role || 'user'
-            });
-        } else {
-            res.status(401).json({ success: false, message: "Acesso Negado." });
+        if (!files || files.length === 0) {
+            listContainer.innerHTML = '<p class="loading-text">Nenhum arquivo encontrado.</p>';
+            return;
         }
+
+        files.forEach(file => {
+            const iconClass = file.type === 'link' ? 'fas fa-link' : 'fas fa-file-alt';
+            const typeClass = file.type === 'link' ? 'type-link' : 'type-file';
+
+            const actionAttr = file.type === 'link'
+                ? `href="${file.content}" target="_blank"`
+                : `href="#" onclick="downloadBase64('${file.content}', '${file.name}')"`;
+
+            // CORREÇÃO: Botões visíveis para TODOS (não só admin)
+            const actionButtons = `
+                <button onclick="openEditFileModal('${file._id}', '${file.name}')" class="btn-action" title="Editar"><i class="fas fa-edit"></i></button>
+                <button onclick="deleteFile('${file._id}')" class="btn-action btn-delete" title="Excluir"><i class="fas fa-trash"></i></button>
+            `;
+
+            const item = document.createElement('div');
+            item.className = `dash-file-item ${typeClass}`;
+            item.setAttribute('data-name', file.name.toLowerCase());
+
+            item.innerHTML = `
+                <i class="${iconClass} df-icon"></i>
+                <div class="df-info">
+                    <span class="df-name">${file.name}</span>
+                    <span class="df-meta">${file.type.toUpperCase()} • ${file.size}</span>
+                </div>
+                <div class="df-actions">
+                    <a ${actionAttr} class="btn-action" title="Acessar"><i class="fas fa-external-link-alt"></i></a>
+                    ${actionButtons}
+                </div>
+            `;
+            listContainer.appendChild(item);
+        });
+
+        const searchInput = document.getElementById('search-input');
+        if (searchInput && searchInput.value) searchInput.dispatchEvent(new Event('input'));
+
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Erro interno." });
+        listContainer.innerHTML = '<p style="color:var(--neon-red); text-align:center">Erro ao carregar arquivos.</p>';
     }
-});
+}
 
-// --- ROTAS DE USUÁRIOS (GESTÃO) ---
-
-// 3. Listar Todos os Usuários (Para o painel de Admin)
-app.get('/api/users', async (req, res) => {
-    try {
-        await connectDB();
-        // Retorna todos, mas remove o campo 'password' por segurança
-        const users = await User.find({}, '-password').sort({ createdAt: -1 });
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao listar usuários" });
-    }
-});
-
-// 4. Criar Novo Usuário
-app.post('/api/users', async (req, res) => {
-    try {
-        await connectDB();
-        const { username, password, role, displayName } = req.body;
-
-        // Verifica duplicidade
-        const exists = await User.findOne({ username });
-        if (exists) return res.status(400).json({ error: "Usuário já existe." });
-
-        const newUser = await User.create({ username, password, role, displayName });
-        res.json({ success: true, user: newUser });
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao criar usuário" });
-    }
-});
-
-// 5. Deletar Usuário
-app.delete('/api/users/:id', async (req, res) => {
-    try {
-        await connectDB();
-        await User.findByIdAndDelete(req.params.id);
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao deletar usuário" });
-    }
-});
-
-// 6. Atualizar Perfil Próprio (Nome e Foto)
-app.put('/api/users/profile', async (req, res) => {
-    try {
-        await connectDB();
-        const { username, displayName, avatar, password } = req.body;
-
-        // Monta o objeto de atualização dinamicamente
-        const updateData = { displayName };
-        if (avatar) updateData.avatar = avatar; // Só atualiza se enviou foto
-        if (password) updateData.password = password; // Só atualiza se enviou senha
-
-        const updatedUser = await User.findOneAndUpdate(
-            { username: username },
-            updateData,
-            { new: true }
-        );
-
-        if (!updatedUser) return res.status(404).json({ error: "Usuário não encontrado" });
-
-        res.json({ success: true, user: updatedUser });
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao atualizar perfil" });
-    }
-});
-
-// --- ROTAS DE ARQUIVOS (FILE SYSTEM) ---
-
-// 7. Listar Arquivos
-app.get('/api/files', async (req, res) => {
-    try {
-        await connectDB();
-        if (!File) return res.json([]);
-        const files = await File.find().sort({ createdAt: -1 });
-        res.json(files);
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao buscar arquivos" });
-    }
-});
-
-// 8. Salvar Arquivo/Link
-app.post('/api/files', async (req, res) => {
-    try {
-        await connectDB();
-        if (!File) return res.status(500).json({ error: "Modelo File não carregado" });
-
-        const newFile = await File.create(req.body);
-        res.json({ success: true, file: newFile });
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao salvar arquivo" });
-    }
-});
-
-// 9. Editar Nome do Arquivo
-app.put('/api/files/:id', async (req, res) => {
-    try {
-        await connectDB();
-        const updated = await File.findByIdAndUpdate(req.params.id, { name: req.body.name }, { new: true });
-        res.json({ success: true, file: updated });
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao editar" });
-    }
-});
-
-// 10. Deletar Arquivo
-app.delete('/api/files/:id', async (req, res) => {
-    try {
-        await connectDB();
-        await File.findByIdAndDelete(req.params.id);
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao deletar" });
-    }
-});
-
-// --- INICIALIZAÇÃO HÍBRIDA ---
-// Se rodar direto no Node (Local), abre a porta.
-// Se for require (Vercel), exporta o app.
-if (require.main === module) {
-    app.listen(PORT, () => {
-        console.log(`🚀 Servidor rodando localmente: http://localhost:${PORT}`);
+// PESQUISA
+const searchInput = document.getElementById('search-input');
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const items = document.querySelectorAll('.dash-file-item');
+        items.forEach(item => {
+            const name = item.getAttribute('data-name');
+            if (name && name.includes(term)) item.style.display = 'flex';
+            else item.style.display = 'none';
+        });
     });
 }
 
-module.exports = app;
+// UPLOAD
+const fileInput = document.getElementById('file-input');
+if (fileInput) {
+    const dropArea = document.getElementById('drop-area');
+    const fileNameDisplay = document.getElementById('file-selected-name');
+
+    dropArea.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+            fileNameDisplay.innerText = this.files[0].name;
+            const nameInput = document.getElementById('file-name-input');
+            if (!nameInput.value) nameInput.value = this.files[0].name;
+        }
+    });
+
+    document.getElementById('form-file').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const file = fileInput.files[0];
+        const name = document.getElementById('file-name-input').value;
+
+        if (!file) return alert("Selecione um arquivo!");
+        if (file.size > 4.5 * 1024 * 1024) return alert("Arquivo muito grande! Máximo 4.5MB.");
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async function () {
+            await saveFile({
+                name: name, type: 'file', content: reader.result,
+                size: (file.size / 1024).toFixed(1) + ' KB'
+            });
+        };
+    });
+
+    document.getElementById('form-link').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('link-name-input').value;
+        const url = document.getElementById('link-url-input').value;
+        await saveFile({ name: name, type: 'link', content: url, size: 'Nuvem' });
+    });
+}
+
+async function saveFile(payload) {
+    const btn = document.querySelector('.upload-form.active .btn-submit');
+    const originalText = btn.innerText;
+    btn.innerText = "Salvando..."; btn.disabled = true;
+    try {
+        const res = await fetch(`${BASE_URL}/api/files`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            alert("Salvo com sucesso!"); loadFiles();
+            document.getElementById('form-file').reset(); document.getElementById('form-link').reset();
+            const disp = document.getElementById('file-selected-name'); if (disp) disp.innerText = "";
+        } else { alert("Erro ao salvar."); }
+    } catch (e) { alert("Erro de conexão."); }
+    btn.innerText = originalText; btn.disabled = false;
+}
+
+// AÇÕES GLOBAIS
+window.deleteFile = async function (id) {
+    if (!confirm("Tem certeza que deseja excluir este arquivo?")) return;
+    try { await fetch(`${BASE_URL}/api/files/${id}`, { method: 'DELETE' }); loadFiles(); } catch (e) { alert("Erro."); }
+}
+
+const editFileModal = document.getElementById('edit-modal');
+const editInput = document.getElementById('edit-name');
+const editIdInput = document.getElementById('edit-id');
+
+window.openEditFileModal = function (id, currentName) {
+    editIdInput.value = id; editInput.value = currentName;
+    editFileModal.classList.add('active');
+}
+
+document.querySelectorAll('.close-modal-btn, .close-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+        btn.closest('.modal-overlay').classList.remove('active');
+    });
+});
+
+document.getElementById('save-edit-btn').addEventListener('click', async () => {
+    const id = editIdInput.value; const newName = editInput.value;
+    try {
+        await fetch(`${BASE_URL}/api/files/${id}`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: newName })
+        });
+        editFileModal.classList.remove('active'); loadFiles();
+    } catch (e) { alert("Erro."); }
+});
+
+window.downloadBase64 = function (base64, fileName) {
+    const link = document.createElement("a"); link.href = base64; link.download = fileName;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+
+window.switchTab = function (tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.upload-form').forEach(f => f.classList.remove('active'));
+    if (tab === 'file') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('form-file').classList.add('active');
+    } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('form-link').classList.add('active');
+    }
+}
+
+// ============================================================
+// MÓDULO DE USUÁRIOS (ADMIN ONLY)
+// ============================================================
+
+async function loadUsers() {
+    const list = document.getElementById('users-list');
+    if (!list) return;
+    try {
+        const res = await fetch(`${BASE_URL}/api/users`);
+        const users = await res.json();
+        list.innerHTML = '';
+        users.forEach(user => {
+            const avatarSrc = (user.avatar && user.avatar.length > 50)
+                ? user.avatar
+                : 'https://via.placeholder.com/40/000000/FFFFFF/?text=' + user.username.charAt(0).toUpperCase();
+            const isAdmin = user.role === 'admin';
+            const display = user.displayName || user.username;
+            const deleteBtn = (user.username !== currentUser)
+                ? `<button onclick="deleteUser('${user._id}')" class="btn-action btn-delete"><i class="fas fa-trash"></i></button>` : '';
+            const card = document.createElement('div');
+            card.className = 'user-card';
+            card.innerHTML = `
+                <img src="${avatarSrc}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid var(--neon-blue)">
+                <div class="user-card-info" style="flex:1; overflow:hidden; margin-left:10px;">
+                    <span class="user-card-name" style="display:block; font-weight:bold; color:#e0e0e0">${display}</span>
+                    <span class="user-card-role ${isAdmin ? 'admin' : ''}" style="font-size:0.75rem; color:#94a3b8">${user.role.toUpperCase()}</span>
+                </div>${deleteBtn}`;
+            list.appendChild(card);
+        });
+    } catch (e) { console.error("Erro usuários", e); }
+}
+
+window.openNewUserModal = function () { document.getElementById('new-user-modal').classList.add('active'); }
+
+const formNewUser = document.getElementById('form-new-user');
+if (formNewUser) {
+    formNewUser.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('new-user-login').value;
+        const name = document.getElementById('new-user-name').value;
+        const pass = document.getElementById('new-user-pass').value;
+        const role = document.getElementById('new-user-role').value;
+        try {
+            const res = await fetch(`${BASE_URL}/api/users`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user, password: pass, role: role, displayName: name })
+            });
+            if (res.ok) {
+                alert("Usuário criado!"); document.getElementById('new-user-modal').classList.remove('active');
+                formNewUser.reset(); loadUsers();
+            } else {
+                const d = await res.json(); alert(d.error || "Erro");
+            }
+        } catch (e) { alert("Erro de conexão"); }
+    });
+}
+
+window.deleteUser = async function (id) {
+    if (!confirm("Remover acesso?")) return;
+    try { await fetch(`${BASE_URL}/api/users/${id}`, { method: 'DELETE' }); loadUsers(); } catch (e) { alert("Erro"); }
+}
+
+// ============================================================
+// MÓDULO DE PERFIL
+// ============================================================
+const profileBtn = document.getElementById('profile-btn');
+const profileModal = document.getElementById('profile-modal');
+const avatarInput = document.getElementById('avatar-input');
+const previewAvatar = document.getElementById('preview-avatar');
+
+if (profileBtn) {
+    profileBtn.addEventListener('click', () => {
+        document.getElementById('profile-name').value = currentDisplayName;
+        if (currentAvatar && currentAvatar.length > 50) previewAvatar.src = currentAvatar;
+        profileModal.classList.add('active');
+    });
+}
+if (avatarInput) {
+    avatarInput.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => previewAvatar.src = e.target.result;
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+}
+const saveProfileBtn = document.getElementById('save-profile-btn');
+if (saveProfileBtn) {
+    saveProfileBtn.addEventListener('click', async () => {
+        const newName = document.getElementById('profile-name').value;
+        const newPass = document.getElementById('profile-pass').value;
+        const file = avatarInput.files[0];
+        const btn = saveProfileBtn; btn.innerText = "Salvando..."; btn.disabled = true;
+        let payload = { username: currentUser, displayName: newName, password: newPass ? newPass : undefined };
+        if (file) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async function () { payload.avatar = reader.result; await sendProfileUpdate(payload); }
+        } else { payload.avatar = currentAvatar; await sendProfileUpdate(payload); }
+    });
+}
+async function sendProfileUpdate(payload) {
+    try {
+        const res = await fetch(`${BASE_URL}/api/users/profile`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem('nordic_displayName', data.user.displayName);
+            localStorage.setItem('nordic_avatar', data.user.avatar || '');
+            currentDisplayName = data.user.displayName; currentAvatar = data.user.avatar || '';
+            alert("Atualizado!"); document.getElementById('profile-modal').classList.remove('active'); updateHeaderUI();
+        } else { alert("Erro ao atualizar."); }
+    } catch (e) { alert("Erro de conexão."); }
+    document.getElementById('save-profile-btn').innerText = "SALVAR ALTERAÇÕES";
+    document.getElementById('save-profile-btn').disabled = false;
+}
+
+// PARTICLES
+const cvs = document.getElementById('particles');
+if (cvs) {
+    const ctx = cvs.getContext('2d');
+    let w = cvs.width = window.innerWidth; let h = cvs.height = window.innerHeight;
+    let parts = [];
+    for (let i = 0; i < 40; i++) parts.push({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5 });
+    function anim() {
+        ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#00f3ff';
+        parts.forEach(p => {
+            p.x += p.vx; p.y += p.vy; if (p.x < 0) p.x = w; if (p.x > w) p.x = 0; if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+            ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2); ctx.fill();
+        });
+        requestAnimationFrame(anim);
+    }
+    anim();
+}
+
+loadFiles();
