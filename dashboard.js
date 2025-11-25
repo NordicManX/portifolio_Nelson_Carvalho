@@ -1,7 +1,24 @@
-/* --- CONFIGURAÇÃO DE AMBIENTE --- */
-const BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:3000'
-    : '';
+/* --- CONFIGURAÇÃO DE AMBIENTE (CORRIGIDO PARA MOBILE) --- */
+function getApiUrl() {
+    const host = window.location.hostname;
+
+    // Verifica se é ambiente local (localhost, 127.0.0.1 ou IPs de rede como 192.168.x.x)
+    const isLocal = host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host.startsWith('192.168.') ||
+        host.startsWith('10.');
+
+    // Se for local, aponta para a porta 3000 no mesmo IP
+    if (isLocal) {
+        return `http://${host}:3000`;
+    }
+
+    // Se for produção (Vercel/Render), usa caminho relativo
+    return '';
+}
+
+const BASE_URL = getApiUrl();
+console.log('Dashboard conectado em:', BASE_URL || 'Produção (Relativo)');
 
 // 1. VERIFICAÇÃO DE SEGURANÇA
 const token = localStorage.getItem('nordic_token');
@@ -11,8 +28,11 @@ let currentAvatar = localStorage.getItem('nordic_avatar') || '';
 let currentDisplayName = localStorage.getItem('nordic_displayName') || currentUser;
 
 if (!token) {
-    alert("Acesso não autorizado. Faça login.");
-    window.location.href = 'index.html';
+    // Evita loop de alert se já estiver na página de login
+    if (!window.location.pathname.endsWith('index.html') && !window.location.pathname.endsWith('/')) {
+        alert("Acesso não autorizado. Faça login.");
+        window.location.href = 'index.html';
+    }
 }
 
 // 2. INTERFACE DO HEADER
@@ -21,34 +41,43 @@ function updateHeaderUI() {
     const headerAvatar = document.getElementById('header-avatar');
     const headerIcon = document.getElementById('header-icon');
 
-    userDisplay.innerHTML = `${currentDisplayName} ${currentRole === 'admin' ? '<small style="color:var(--neon-red)">(Admin)</small>' : ''}`;
+    if (userDisplay) {
+        userDisplay.innerHTML = `${currentDisplayName} ${currentRole === 'admin' ? '<small style="color:var(--neon-red)">(Admin)</small>' : ''}`;
+    }
 
-    if (currentAvatar && currentAvatar.length > 50) {
-        headerAvatar.src = currentAvatar;
-        headerAvatar.style.display = 'inline-block';
-        if (headerIcon) headerIcon.style.display = 'none';
-    } else {
-        headerAvatar.style.display = 'none';
-        if (headerIcon) headerIcon.style.display = 'inline-block';
+    if (headerAvatar && headerIcon) {
+        if (currentAvatar && currentAvatar.length > 50) {
+            headerAvatar.src = currentAvatar;
+            headerAvatar.style.display = 'inline-block';
+            headerIcon.style.display = 'none';
+        } else {
+            headerAvatar.style.display = 'none';
+            headerIcon.style.display = 'inline-block';
+        }
     }
 }
-updateHeaderUI();
+// Garante que o DOM carregou antes de rodar
+document.addEventListener('DOMContentLoaded', updateHeaderUI);
 
 // 3. CONTROLE DE PRIVILÉGIOS
-const adminUsersPanel = document.getElementById('admin-users-panel');
-
-if (currentRole === 'admin') {
-    loadUsers();
-    if (adminUsersPanel) adminUsersPanel.style.display = 'block';
-} else {
-    if (adminUsersPanel) adminUsersPanel.style.display = 'none';
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const adminUsersPanel = document.getElementById('admin-users-panel');
+    if (currentRole === 'admin') {
+        loadUsers();
+        if (adminUsersPanel) adminUsersPanel.style.display = 'block';
+    } else {
+        if (adminUsersPanel) adminUsersPanel.style.display = 'none';
+    }
+});
 
 // 4. LOGOUT
-document.getElementById('logout-btn').addEventListener('click', () => {
-    localStorage.clear();
-    window.location.href = 'index.html';
-});
+const logoutBtn = document.getElementById('logout-btn');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = 'index.html';
+    });
+}
 
 // ============================================================
 // MÓDULO DE ARQUIVOS
@@ -61,6 +90,9 @@ async function loadFiles() {
 
     try {
         const res = await fetch(`${BASE_URL}/api/files`);
+
+        if (!res.ok) throw new Error(`Erro API: ${res.status}`);
+
         const files = await res.json();
         listContainer.innerHTML = '';
 
@@ -105,7 +137,7 @@ async function loadFiles() {
 
     } catch (error) {
         console.error(error);
-        listContainer.innerHTML = '<p style="color:var(--neon-red); text-align:center">Erro ao carregar arquivos.</p>';
+        listContainer.innerHTML = '<p style="color:var(--neon-red); text-align:center">Erro de conexão com o servidor.</p>';
     }
 }
 
@@ -129,57 +161,68 @@ if (fileInput) {
     const dropArea = document.getElementById('drop-area');
     const fileNameDisplay = document.getElementById('file-selected-name');
 
-    dropArea.addEventListener('click', () => fileInput.click());
+    if (dropArea) dropArea.addEventListener('click', () => fileInput.click());
 
     fileInput.addEventListener('change', function () {
         if (this.files && this.files[0]) {
-            fileNameDisplay.innerText = this.files[0].name;
+            if (fileNameDisplay) fileNameDisplay.innerText = this.files[0].name;
             const nameInput = document.getElementById('file-name-input');
-            if (!nameInput.value) nameInput.value = this.files[0].name;
+            if (nameInput && !nameInput.value) nameInput.value = this.files[0].name;
         }
     });
 
-    document.getElementById('form-file').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const file = fileInput.files[0];
-        const name = document.getElementById('file-name-input').value;
+    const formFile = document.getElementById('form-file');
+    if (formFile) {
+        formFile.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = fileInput.files[0];
+            const name = document.getElementById('file-name-input').value;
 
-        if (!file) return alert("Selecione um arquivo!");
-        if (file.size > 4.5 * 1024 * 1024) return alert("Arquivo muito grande! Máximo 4.5MB.");
+            if (!file) return alert("Selecione um arquivo!");
+            if (file.size > 4.5 * 1024 * 1024) return alert("Arquivo muito grande! Máximo 4.5MB.");
 
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = async function () {
-            await saveFile({
-                name: name, type: 'file', content: reader.result,
-                size: (file.size / 1024).toFixed(1) + ' KB'
-            });
-        };
-    });
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async function () {
+                await saveFile({
+                    name: name, type: 'file', content: reader.result,
+                    size: (file.size / 1024).toFixed(1) + ' KB'
+                });
+            };
+        });
+    }
 
-    document.getElementById('form-link').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = document.getElementById('link-name-input').value;
-        const url = document.getElementById('link-url-input').value;
-        await saveFile({ name: name, type: 'link', content: url, size: 'Nuvem' });
-    });
+    const formLink = document.getElementById('form-link');
+    if (formLink) {
+        formLink.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('link-name-input').value;
+            const url = document.getElementById('link-url-input').value;
+            await saveFile({ name: name, type: 'link', content: url, size: 'Nuvem' });
+        });
+    }
 }
 
 async function saveFile(payload) {
     const btn = document.querySelector('.upload-form.active .btn-submit');
-    const originalText = btn.innerText;
-    btn.innerText = "Salvando..."; btn.disabled = true;
+    const originalText = btn ? btn.innerText : 'Salvar';
+    if (btn) { btn.innerText = "Salvando..."; btn.disabled = true; }
+
     try {
         const res = await fetch(`${BASE_URL}/api/files`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
         });
         if (res.ok) {
-            alert("Salvo com sucesso!"); loadFiles();
-            document.getElementById('form-file').reset(); document.getElementById('form-link').reset();
-            const disp = document.getElementById('file-selected-name'); if (disp) disp.innerText = "";
+            alert("Salvo com sucesso!");
+            loadFiles();
+            document.getElementById('form-file').reset();
+            document.getElementById('form-link').reset();
+            const disp = document.getElementById('file-selected-name');
+            if (disp) disp.innerText = "";
         } else { alert("Erro ao salvar."); }
     } catch (e) { alert("Erro de conexão."); }
-    btn.innerText = originalText; btn.disabled = false;
+
+    if (btn) { btn.innerText = originalText; btn.disabled = false; }
 }
 
 // AÇÕES GLOBAIS
@@ -193,25 +236,31 @@ const editInput = document.getElementById('edit-name');
 const editIdInput = document.getElementById('edit-id');
 
 window.openEditFileModal = function (id, currentName) {
-    editIdInput.value = id; editInput.value = currentName;
-    editFileModal.classList.add('active');
+    if (editIdInput) editIdInput.value = id;
+    if (editInput) editInput.value = currentName;
+    if (editFileModal) editFileModal.classList.add('active');
 }
 
 document.querySelectorAll('.close-modal-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-        btn.closest('.modal-overlay').classList.remove('active');
+        const overlay = btn.closest('.modal-overlay');
+        if (overlay) overlay.classList.remove('active');
     });
 });
 
-document.getElementById('save-edit-btn').addEventListener('click', async () => {
-    const id = editIdInput.value; const newName = editInput.value;
-    try {
-        await fetch(`${BASE_URL}/api/files/${id}`, {
-            method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: newName })
-        });
-        editFileModal.classList.remove('active'); loadFiles();
-    } catch (e) { alert("Erro."); }
-});
+const saveEditBtn = document.getElementById('save-edit-btn');
+if (saveEditBtn) {
+    saveEditBtn.addEventListener('click', async () => {
+        const id = editIdInput.value; const newName = editInput.value;
+        try {
+            await fetch(`${BASE_URL}/api/files/${id}`, {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: newName })
+            });
+            if (editFileModal) editFileModal.classList.remove('active');
+            loadFiles();
+        } catch (e) { alert("Erro."); }
+    });
+}
 
 window.downloadBase64 = function (base64, fileName) {
     const link = document.createElement("a"); link.href = base64; link.download = fileName;
@@ -221,12 +270,17 @@ window.downloadBase64 = function (base64, fileName) {
 window.switchTab = function (tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.upload-form').forEach(f => f.classList.remove('active'));
-    if (tab === 'file') {
-        document.querySelectorAll('.tab-btn')[0].classList.add('active');
-        document.getElementById('form-file').classList.add('active');
-    } else {
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('form-link').classList.add('active');
+
+    const tabs = document.querySelectorAll('.tab-btn');
+    const formFile = document.getElementById('form-file');
+    const formLink = document.getElementById('form-link');
+
+    if (tab === 'file' && tabs[0] && formFile) {
+        tabs[0].classList.add('active');
+        formFile.classList.add('active');
+    } else if (tabs[1] && formLink) {
+        tabs[1].classList.add('active');
+        formLink.classList.add('active');
     }
 }
 
@@ -262,7 +316,10 @@ async function loadUsers() {
     } catch (e) { console.error("Erro usuários", e); }
 }
 
-window.openNewUserModal = function () { document.getElementById('new-user-modal').classList.add('active'); }
+window.openNewUserModal = function () {
+    const modal = document.getElementById('new-user-modal');
+    if (modal) modal.classList.add('active');
+}
 
 const formNewUser = document.getElementById('form-new-user');
 if (formNewUser) {
@@ -278,8 +335,10 @@ if (formNewUser) {
                 body: JSON.stringify({ username: user, password: pass, role: role, displayName: name })
             });
             if (res.ok) {
-                alert("Usuário criado!"); document.getElementById('new-user-modal').classList.remove('active');
-                formNewUser.reset(); loadUsers();
+                alert("Usuário criado!");
+                document.getElementById('new-user-modal').classList.remove('active');
+                formNewUser.reset();
+                loadUsers();
             } else {
                 const d = await res.json(); alert(d.error || "Erro");
             }
@@ -302,16 +361,17 @@ const previewAvatar = document.getElementById('preview-avatar');
 
 if (profileBtn) {
     profileBtn.addEventListener('click', () => {
-        document.getElementById('profile-name').value = currentDisplayName;
-        if (currentAvatar && currentAvatar.length > 50) previewAvatar.src = currentAvatar;
-        profileModal.classList.add('active');
+        const nameInput = document.getElementById('profile-name');
+        if (nameInput) nameInput.value = currentDisplayName;
+        if (currentAvatar && currentAvatar.length > 50 && previewAvatar) previewAvatar.src = currentAvatar;
+        if (profileModal) profileModal.classList.add('active');
     });
 }
 if (avatarInput) {
     avatarInput.addEventListener('change', function () {
         if (this.files && this.files[0]) {
             const reader = new FileReader();
-            reader.onload = (e) => previewAvatar.src = e.target.result;
+            reader.onload = (e) => { if (previewAvatar) previewAvatar.src = e.target.result; }
             reader.readAsDataURL(this.files[0]);
         }
     });
@@ -341,40 +401,65 @@ async function sendProfileUpdate(payload) {
             localStorage.setItem('nordic_displayName', data.user.displayName);
             localStorage.setItem('nordic_avatar', data.user.avatar || '');
             currentDisplayName = data.user.displayName; currentAvatar = data.user.avatar || '';
-            alert("Atualizado!"); document.getElementById('profile-modal').classList.remove('active'); updateHeaderUI();
+            alert("Atualizado!");
+            if (profileModal) profileModal.classList.remove('active');
+            updateHeaderUI();
         } else { alert("Erro ao atualizar."); }
     } catch (e) { alert("Erro de conexão."); }
-    document.getElementById('save-profile-btn').innerText = "SALVAR ALTERAÇÕES";
-    document.getElementById('save-profile-btn').disabled = false;
+
+    const btn = document.getElementById('save-profile-btn');
+    if (btn) { btn.innerText = "SALVAR ALTERAÇÕES"; btn.disabled = false; }
 }
 
 // ============================================================
-// PARTICLES (FUNDO ANIMADO) - ATUALIZADO
+// PARTICLES (FUNDO ANIMADO) - OTIMIZADO PARA MOBILE
 // ============================================================
-const cvs = document.getElementById('particles');
-if (cvs) {
-    const ctx = cvs.getContext('2d');
-    let w = cvs.width = window.innerWidth;
-    let h = cvs.height = window.innerHeight;
+document.addEventListener('DOMContentLoaded', () => {
+    const cvs = document.getElementById('particles');
+    if (cvs) {
+        const ctx = cvs.getContext('2d');
+        let w = cvs.width = window.innerWidth;
+        let h = cvs.height = window.innerHeight;
 
-    // ATUALIZAÇÃO PARA RESPONSIVIDADE (RESIZE)
-    window.addEventListener('resize', () => {
-        w = cvs.width = window.innerWidth;
-        h = cvs.height = window.innerHeight;
-    });
-
-    let parts = [];
-    for (let i = 0; i < 40; i++) parts.push({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5 });
-
-    function anim() {
-        ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#00f3ff';
-        parts.forEach(p => {
-            p.x += p.vx; p.y += p.vy; if (p.x < 0) p.x = w; if (p.x > w) p.x = 0; if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
-            ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2); ctx.fill();
+        // ATUALIZAÇÃO PARA RESPONSIVIDADE
+        window.addEventListener('resize', () => {
+            w = cvs.width = window.innerWidth;
+            h = cvs.height = window.innerHeight;
         });
-        requestAnimationFrame(anim);
-    }
-    anim();
-}
 
-loadFiles();
+        // Reduz número de partículas no mobile para performance
+        const isMobile = w < 768;
+        const particleCount = isMobile ? 20 : 40;
+
+        let parts = [];
+        for (let i = 0; i < particleCount; i++) {
+            parts.push({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5
+            });
+        }
+
+        function anim() {
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = '#00f3ff';
+
+            parts.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+                if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(anim);
+        }
+        anim();
+    }
+
+    // Inicia o carregamento de arquivos APÓS o DOM estar pronto
+    loadFiles();
+});
